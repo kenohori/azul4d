@@ -1,0 +1,303 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		BE13FBE01DDD17C70041FCFF /* Controller.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE13FBDF1DDD17C70041FCFF /* Controller.swift */; };
+		BE13FBE21DDD17C70041FCFF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BE13FBE11DDD17C70041FCFF /* Assets.xcassets */; };
+		BE13FBE51DDD17C70041FCFF /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = BE13FBE31DDD17C70041FCFF /* MainMenu.xib */; };
+		BE73C5A11DDD19C8002AAD65 /* MetalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE73C5A01DDD19C8002AAD65 /* MetalView.swift */; };
+		BE73C5A31DDD1A90002AAD65 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = BE73C5A21DDD1A90002AAD65 /* Shaders.metal */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		BE13FBDC1DDD17C70041FCFF /* azul4d.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = azul4d.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		BE13FBDF1DDD17C70041FCFF /* Controller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Controller.swift; sourceTree = "<group>"; };
+		BE13FBE11DDD17C70041FCFF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		BE13FBE41DDD17C70041FCFF /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		BE13FBE61DDD17C70041FCFF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		BE73C5A01DDD19C8002AAD65 /* MetalView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MetalView.swift; sourceTree = "<group>"; };
+		BE73C5A21DDD1A90002AAD65 /* Shaders.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		BE13FBD91DDD17C70041FCFF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		BE13FBD31DDD17C70041FCFF = {
+			isa = PBXGroup;
+			children = (
+				BE13FBDE1DDD17C70041FCFF /* azul4d */,
+				BE13FBDD1DDD17C70041FCFF /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		BE13FBDD1DDD17C70041FCFF /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				BE13FBDC1DDD17C70041FCFF /* azul4d.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		BE13FBDE1DDD17C70041FCFF /* azul4d */ = {
+			isa = PBXGroup;
+			children = (
+				BE13FBDF1DDD17C70041FCFF /* Controller.swift */,
+				BE73C5A21DDD1A90002AAD65 /* Shaders.metal */,
+				BE73C5A01DDD19C8002AAD65 /* MetalView.swift */,
+				BE13FBE11DDD17C70041FCFF /* Assets.xcassets */,
+				BE13FBE31DDD17C70041FCFF /* MainMenu.xib */,
+				BE13FBE61DDD17C70041FCFF /* Info.plist */,
+			);
+			path = azul4d;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		BE13FBDB1DDD17C70041FCFF /* azul4d */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BE13FBE91DDD17C70041FCFF /* Build configuration list for PBXNativeTarget "azul4d" */;
+			buildPhases = (
+				BE13FBD81DDD17C70041FCFF /* Sources */,
+				BE13FBD91DDD17C70041FCFF /* Frameworks */,
+				BE13FBDA1DDD17C70041FCFF /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = azul4d;
+			productName = azul4d;
+			productReference = BE13FBDC1DDD17C70041FCFF /* azul4d.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		BE13FBD41DDD17C70041FCFF /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 0810;
+				LastUpgradeCheck = 0810;
+				ORGANIZATIONNAME = "Ken Arroyo Ohori";
+				TargetAttributes = {
+					BE13FBDB1DDD17C70041FCFF = {
+						CreatedOnToolsVersion = 8.1;
+						DevelopmentTeam = UD3V83TPY7;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = BE13FBD71DDD17C70041FCFF /* Build configuration list for PBXProject "azul4d" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = BE13FBD31DDD17C70041FCFF;
+			productRefGroup = BE13FBDD1DDD17C70041FCFF /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				BE13FBDB1DDD17C70041FCFF /* azul4d */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		BE13FBDA1DDD17C70041FCFF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BE13FBE21DDD17C70041FCFF /* Assets.xcassets in Resources */,
+				BE13FBE51DDD17C70041FCFF /* MainMenu.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		BE13FBD81DDD17C70041FCFF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BE73C5A31DDD1A90002AAD65 /* Shaders.metal in Sources */,
+				BE73C5A11DDD19C8002AAD65 /* MetalView.swift in Sources */,
+				BE13FBE01DDD17C70041FCFF /* Controller.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		BE13FBE31DDD17C70041FCFF /* MainMenu.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				BE13FBE41DDD17C70041FCFF /* Base */,
+			);
+			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		BE13FBE71DDD17C70041FCFF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVES = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		BE13FBE81DDD17C70041FCFF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVES = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = macosx;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+			};
+			name = Release;
+		};
+		BE13FBEA1DDD17C70041FCFF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = UD3V83TPY7;
+				INFOPLIST_FILE = azul4d/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = tudelft3d.azul4d;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
+			};
+			name = Debug;
+		};
+		BE13FBEB1DDD17C70041FCFF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = UD3V83TPY7;
+				INFOPLIST_FILE = azul4d/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = tudelft3d.azul4d;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		BE13FBD71DDD17C70041FCFF /* Build configuration list for PBXProject "azul4d" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BE13FBE71DDD17C70041FCFF /* Debug */,
+				BE13FBE81DDD17C70041FCFF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BE13FBE91DDD17C70041FCFF /* Build configuration list for PBXNativeTarget "azul4d" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BE13FBEA1DDD17C70041FCFF /* Debug */,
+				BE13FBEB1DDD17C70041FCFF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = BE13FBD41DDD17C70041FCFF /* Project object */;
+}
