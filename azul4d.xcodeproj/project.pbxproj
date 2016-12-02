@@ -10,6 +10,7 @@
 		BE13FBE01DDD17C70041FCFF /* Controller.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE13FBDF1DDD17C70041FCFF /* Controller.swift */; };
 		BE13FBE21DDD17C70041FCFF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BE13FBE11DDD17C70041FCFF /* Assets.xcassets */; };
 		BE13FBE51DDD17C70041FCFF /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = BE13FBE31DDD17C70041FCFF /* MainMenu.xib */; };
+		BE2200611DF210E700B2DBFC /* Math.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE2200601DF210E700B2DBFC /* Math.swift */; };
 		BE73C5A11DDD19C8002AAD65 /* MetalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE73C5A01DDD19C8002AAD65 /* MetalView.swift */; };
 		BE73C5A31DDD1A90002AAD65 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = BE73C5A21DDD1A90002AAD65 /* Shaders.metal */; };
 /* End PBXBuildFile section */
@@ -20,6 +21,7 @@
 		BE13FBE11DDD17C70041FCFF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		BE13FBE41DDD17C70041FCFF /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		BE13FBE61DDD17C70041FCFF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		BE2200601DF210E700B2DBFC /* Math.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Math.swift; sourceTree = "<group>"; };
 		BE73C5A01DDD19C8002AAD65 /* MetalView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MetalView.swift; sourceTree = "<group>"; };
 		BE73C5A21DDD1A90002AAD65 /* Shaders.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -57,6 +59,7 @@
 				BE13FBDF1DDD17C70041FCFF /* Controller.swift */,
 				BE73C5A21DDD1A90002AAD65 /* Shaders.metal */,
 				BE73C5A01DDD19C8002AAD65 /* MetalView.swift */,
+				BE2200601DF210E700B2DBFC /* Math.swift */,
 				BE13FBE11DDD17C70041FCFF /* Assets.xcassets */,
 				BE13FBE31DDD17C70041FCFF /* MainMenu.xib */,
 				BE13FBE61DDD17C70041FCFF /* Info.plist */,
@@ -139,6 +142,7 @@
 				BE73C5A31DDD1A90002AAD65 /* Shaders.metal in Sources */,
 				BE73C5A11DDD19C8002AAD65 /* MetalView.swift in Sources */,
 				BE13FBE01DDD17C70041FCFF /* Controller.swift in Sources */,
+				BE2200611DF210E700B2DBFC /* Math.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

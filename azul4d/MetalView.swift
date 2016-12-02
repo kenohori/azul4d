@@ -9,11 +9,31 @@
 import Metal
 import MetalKit
 
+struct Constants {
+  var modelViewProjectionMatrix = matrix_identity_float4x4
+}
+
+struct Vertex {
+  var position: float3
+  var colour: float3
+}
+
 class MetalView: MTKView {
   
   var commandQueue: MTLCommandQueue?
   var renderPipelineState: MTLRenderPipelineState?
   var depthStencilState: MTLDepthStencilState?
+  
+  var eye = float3(0.0, 0.0, 0.0)
+  var centre = float3(0.0, 0.0, -1.0)
+  var fieldOfView: Float = 1.047197551196598
+  
+  var modelMatrix = matrix_identity_float4x4
+  var viewMatrix = matrix_identity_float4x4
+  var projectionMatrix = matrix_identity_float4x4
+  
+  var constants = Constants()
+  var verticesBuffer: MTLBuffer?
   
   required init(coder: NSCoder) {
     
@@ -51,6 +71,18 @@ class MetalView: MTKView {
     depthSencilDescriptor.depthCompareFunction = .less
     depthSencilDescriptor.isDepthWriteEnabled = true
     depthStencilState = device!.makeDepthStencilState(descriptor: depthSencilDescriptor)
+    
+    // Matrices
+    modelMatrix = matrix4x4_translation(shift: centre)
+    viewMatrix = matrix4x4_look_at(eye: eye, centre: centre, up: float3(0.0, 1.0, 0.0))
+    projectionMatrix = matrix4x4_perspective(fieldOfView: fieldOfView, aspectRatio: Float(bounds.size.width / bounds.size.height), nearZ: 0.001, farZ: 100.0)
+    constants.modelViewProjectionMatrix = matrix_multiply(projectionMatrix, matrix_multiply(viewMatrix, modelMatrix))
+    
+    // Data
+    let vertices: [Vertex] = [Vertex(position: float3(-1.0, 0.0, 0.0), colour: float3(1.0, 0.0, 0.0)),
+                              Vertex(position: float3(1.0, 0.0, 0.0), colour: float3(0.0, 1.0, 0.0)),
+                              Vertex(position: float3(0.0, 1.0, 0.0), colour: float3(0.0, 0.0, 1.0))]
+    verticesBuffer = device!.makeBuffer(bytes: vertices, length: MemoryLayout<Vertex>.size*vertices.count, options: [])
   }
   
   override func draw(_ dirtyRect: NSRect) {
@@ -66,6 +98,10 @@ class MetalView: MTKView {
     
     let colour = sin(CACurrentMediaTime())
     clearColor = MTLClearColorMake(colour, colour, colour, 1.0)
+    
+    renderEncoder.setVertexBuffer(verticesBuffer, offset: 0, at: 0)
+    renderEncoder.setVertexBytes(&constants, length: MemoryLayout<Constants>.size, at: 1)
+    renderEncoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: 3)
     
     renderEncoder.endEncoding()
     let drawable = currentDrawable!

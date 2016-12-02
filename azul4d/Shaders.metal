@@ -19,11 +19,11 @@ using namespace metal;
 
 struct Constants {
   float4x4 modelViewProjectionMatrix;
-  float4 colour;
 };
 
 struct VertexIn {
   float3 position;
+  float3 colour;
 };
 
 struct VertexOut {
@@ -36,7 +36,7 @@ vertex VertexOut vertexTransform(device VertexIn *vertices [[buffer(0)]],
                                  uint VertexId [[vertex_id]]) {
   VertexOut out;
   out.position = uniforms.modelViewProjectionMatrix * float4(vertices[VertexId].position, 1.0);
-  out.colour = uniforms.colour;
+  out.colour = float4(vertices[VertexId].colour, 1.0);
   return out;
 }
 
