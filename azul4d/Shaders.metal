@@ -22,7 +22,7 @@ struct Constants {
 };
 
 struct VertexIn {
-  float3 position;
+  float4 position;
   float3 colour;
 };
 
@@ -35,7 +35,7 @@ vertex VertexOut vertexTransform(device VertexIn *vertices [[buffer(0)]],
                                  constant Constants &uniforms [[buffer(1)]],
                                  uint VertexId [[vertex_id]]) {
   VertexOut out;
-  out.position = uniforms.modelViewProjectionMatrix * float4(vertices[VertexId].position, 1.0);
+  out.position = uniforms.modelViewProjectionMatrix * vertices[VertexId].position;
   out.colour = float4(vertices[VertexId].colour, 1.0);
   return out;
 }

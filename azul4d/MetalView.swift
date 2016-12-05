@@ -14,7 +14,7 @@ struct Constants {
 }
 
 struct Vertex {
-  var position: float3
+  var position: float4
   var colour: float3
 }
 
@@ -75,13 +75,14 @@ class MetalView: MTKView {
     // Matrices
     modelMatrix = matrix4x4_translation(shift: centre)
     viewMatrix = matrix4x4_look_at(eye: eye, centre: centre, up: float3(0.0, 1.0, 0.0))
-    projectionMatrix = matrix4x4_perspective(fieldOfView: fieldOfView, aspectRatio: Float(bounds.size.width / bounds.size.height), nearZ: 0.001, farZ: 100.0)
+    projectionMatrix = matrix4x4_perspective(fieldOfView: fieldOfView, aspectRatio: Float(bounds.size.width / bounds.size.height), nearZ: 0.01, farZ: 10.0)
     constants.modelViewProjectionMatrix = matrix_multiply(projectionMatrix, matrix_multiply(viewMatrix, modelMatrix))
     
     // Data
-    let vertices: [Vertex] = [Vertex(position: float3(-1.0, 0.0, 0.0), colour: float3(1.0, 0.0, 0.0)),
-                              Vertex(position: float3(1.0, 0.0, 0.0), colour: float3(0.0, 1.0, 0.0)),
-                              Vertex(position: float3(0.0, 1.0, 0.0), colour: float3(0.0, 0.0, 1.0))]
+    let vertices = createTesseract()
+//    let vertices: [Vertex] = [Vertex(position: float3(-1.0, -1.0, -1.0), colour: float3(1.0, 0.0, 0.0)),
+//                              Vertex(position: float3(-1.0, 1.0, -1.0), colour: float3(0.0, 1.0, 0.0)),
+//                              Vertex(position: float3(1.0, 1.0, -1.0), colour: float3(0.0, 0.0, 1.0))]
     verticesBuffer = device!.makeBuffer(bytes: vertices, length: MemoryLayout<Vertex>.size*vertices.count, options: [])
   }
   
@@ -109,4 +110,59 @@ class MetalView: MTKView {
     commandBuffer.commit()
   }
   
+  func triangulatePolygon(vertices: [Vertex]) -> [Vertex] {
+    var triangulatedPolygon = [Vertex]()
+    
+    // Compute centroid
+    var sumPosition = float4(0.0, 0.0, 0.0, 0.0)
+    var sumColour = float3(0.0, 0.0, 0.0)
+    for vertex in vertices {
+      sumPosition += vertex.position
+      sumColour += vertex.colour
+    }
+    let centroid = Vertex(position: float4(sumPosition.x/Float(vertices.count), sumPosition.y/Float(vertices.count), sumPosition.z/Float(vertices.count), sumPosition.w/Float(vertices.count)),
+                          colour: float3(sumColour.x/Float(vertices.count), sumColour.y/Float(vertices.count), sumColour.z/Float(vertices.count)))
+    
+    // Generate triangles
+    for vertexIndex in 1..<vertices.count {
+      triangulatedPolygon.append(contentsOf: [vertices[vertexIndex-1], vertices[vertexIndex], centroid])
+    }
+    
+    return triangulatedPolygon
+  }
+  
+  func createTesseract() -> [Vertex] {
+    let point_0000 = Vertex(position: float4(-1, -1, -1, -1), colour: float3(0.5, 0.5, 1.0))
+    let point_0001 = Vertex(position: float4(-1, -1, -1, +1), colour: float3(0.5, 0.5, 1.0))
+    let point_0010 = Vertex(position: float4(-1, -1, +1, -1), colour: float3(0.5, 0.5, 1.0))
+    let point_0011 = Vertex(position: float4(-1, -1, +1, +1), colour: float3(0.5, 0.5, 1.0))
+    let point_0100 = Vertex(position: float4(-1, +1, -1, -1), colour: float3(0.5, 0.5, 1.0))
+    let point_0101 = Vertex(position: float4(-1, +1, -1, +1), colour: float3(0.5, 0.5, 1.0))
+    let point_0110 = Vertex(position: float4(-1, +1, +1, -1), colour: float3(0.5, 0.5, 1.0))
+    let point_0111 = Vertex(position: float4(-1, +1, +1, +1), colour: float3(0.5, 0.5, 1.0))
+    let point_1000 = Vertex(position: float4(+1, -1, -1, -1), colour: float3(0.5, 0.5, 1.0))
+    let point_1001 = Vertex(position: float4(+1, -1, -1, +1), colour: float3(0.5, 0.5, 1.0))
+    let point_1010 = Vertex(position: float4(+1, -1, +1, -1), colour: float3(0.5, 0.5, 1.0))
+    let point_1011 = Vertex(position: float4(+1, -1, +1, +1), colour: float3(0.5, 0.5, 1.0))
+    let point_1100 = Vertex(position: float4(+1, +1, -1, -1), colour: float3(0.5, 0.5, 1.0))
+    let point_1101 = Vertex(position: float4(+1, +1, -1, +1), colour: float3(0.5, 0.5, 1.0))
+    let point_1110 = Vertex(position: float4(+1, +1, +1, -1), colour: float3(0.5, 0.5, 1.0))
+    let point_1111 = Vertex(position: float4(+1, +1, +1, +1), colour: float3(0.5, 0.5, 1.0))
+    
+    var tesseract = [Vertex]()
+    
+    // ffvv
+    tesseract.append(contentsOf: triangulatePolygon(vertices: [point_0000, point_0001, point_0011, point_0010]))
+    tesseract.append(contentsOf: triangulatePolygon(vertices: [point_0100, point_0101, point_0111, point_0110]))
+    tesseract.append(contentsOf: triangulatePolygon(vertices: [point_1000, point_1001, point_1011, point_1010]))
+    tesseract.append(contentsOf: triangulatePolygon(vertices: [point_1100, point_1101, point_1111, point_1110]))
+    
+    // fvfv
+    tesseract.append(contentsOf: triangulatePolygon(vertices: [point_0000, point_0001, point_0101, point_0100]))
+    tesseract.append(contentsOf: triangulatePolygon(vertices: [point_0010, point_0011, point_0111, point_0110]))
+    tesseract.append(contentsOf: triangulatePolygon(vertices: [point_1000, point_1001, point_1101, point_1100]))
+    tesseract.append(contentsOf: triangulatePolygon(vertices: [point_1010, point_1011, point_1111, point_1110]))
+    
+    return tesseract
+  }
 }
