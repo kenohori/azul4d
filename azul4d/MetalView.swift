@@ -79,10 +79,26 @@ class MetalView: MTKView {
     constants.modelViewProjectionMatrix = matrix_multiply(projectionMatrix, matrix_multiply(viewMatrix, modelMatrix))
     
     // Data
+    var vertices = [Vertex]()
+    let cppLink = CppLinkWrapperWrapper()!
+    cppLink.initialiseTesseract()
+    while !cppLink.polygonIteratorEnded() {
+      cppLink.initialisePointIterator()
+      while !cppLink.pointIteratorEnded() {
+        let firstPointCoordinate = cppLink.currentPoint()
+        let pointCoordinatesBuffer = UnsafeBufferPointer(start: firstPointCoordinate, count: 4)
+        let pointCoordinatesArray = ContiguousArray(pointCoordinatesBuffer)
+        let pointCoordinates = [Float](pointCoordinatesArray)
+        Swift.print(pointCoordinates)
+        vertices.append(Vertex(position: float4(pointCoordinates[0], pointCoordinates[1], pointCoordinates[2], pointCoordinates[3]), colour: float3(0.5, 0.5, 0.5)))
+        cppLink.advancePointIterator()
+      }
+      cppLink.advancePolygonIterator()
+    }
 //    let vertices: [Vertex] = [Vertex(position: float3(-1.0, -1.0, -1.0), colour: float3(1.0, 0.0, 0.0)),
 //                              Vertex(position: float3(-1.0, 1.0, -1.0), colour: float3(0.0, 1.0, 0.0)),
 //                              Vertex(position: float3(1.0, 1.0, -1.0), colour: float3(0.0, 0.0, 1.0))]
-//    verticesBuffer = device!.makeBuffer(bytes: vertices, length: MemoryLayout<Vertex>.size*vertices.count, options: [])
+    verticesBuffer = device!.makeBuffer(bytes: vertices, length: MemoryLayout<Vertex>.size*vertices.count, options: [])
   }
   
   override func draw(_ dirtyRect: NSRect) {
