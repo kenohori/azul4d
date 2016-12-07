@@ -25,7 +25,7 @@ class MetalView: MTKView {
   var depthStencilState: MTLDepthStencilState?
   
   var eye = float3(0.0, 0.0, 0.0)
-  var centre = float3(0.0, 0.0, -1.0)
+  var centre = float3(0.0, 0.0, 5.0)
   var fieldOfView: Float = 1.047197551196598
   
   var modelMatrix = matrix_identity_float4x4
@@ -89,15 +89,13 @@ class MetalView: MTKView {
         let pointCoordinatesBuffer = UnsafeBufferPointer(start: firstPointCoordinate, count: 4)
         let pointCoordinatesArray = ContiguousArray(pointCoordinatesBuffer)
         let pointCoordinates = [Float](pointCoordinatesArray)
-        Swift.print(pointCoordinates)
-        vertices.append(Vertex(position: float4(pointCoordinates[0], pointCoordinates[1], pointCoordinates[2], pointCoordinates[3]), colour: float3(0.5, 0.5, 0.5)))
+//        Swift.print(pointCoordinates)
+        vertices.append(Vertex(position: float4(pointCoordinates[0], pointCoordinates[1], pointCoordinates[2], pointCoordinates[3]), colour: float3(1.0, 0.0, 0.0)))
         cppLink.advancePointIterator()
       }
       cppLink.advancePolygonIterator()
     }
-//    let vertices: [Vertex] = [Vertex(position: float3(-1.0, -1.0, -1.0), colour: float3(1.0, 0.0, 0.0)),
-//                              Vertex(position: float3(-1.0, 1.0, -1.0), colour: float3(0.0, 1.0, 0.0)),
-//                              Vertex(position: float3(1.0, 1.0, -1.0), colour: float3(0.0, 0.0, 1.0))]
+//    Swift.print(vertices.count)
     verticesBuffer = device!.makeBuffer(bytes: vertices, length: MemoryLayout<Vertex>.size*vertices.count, options: [])
   }
   
@@ -117,7 +115,7 @@ class MetalView: MTKView {
     
     renderEncoder.setVertexBuffer(verticesBuffer, offset: 0, at: 0)
     renderEncoder.setVertexBytes(&constants, length: MemoryLayout<Constants>.size, at: 1)
-    renderEncoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: 3)
+    renderEncoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: verticesBuffer!.length/MemoryLayout<Vertex>.size)
     
     renderEncoder.endEncoding()
     let drawable = currentDrawable!
