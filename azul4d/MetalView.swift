@@ -122,4 +122,11 @@ class MetalView: MTKView {
     commandBuffer.present(drawable)
     commandBuffer.commit()
   }
+  
+  override func setFrameSize(_ newSize: NSSize) {
+    super.setFrameSize(newSize)
+    projectionMatrix = matrix4x4_perspective(fieldOfView: fieldOfView, aspectRatio: Float(bounds.size.width / bounds.size.height), nearZ: 0.001, farZ: 100.0)
+    constants.modelViewProjectionMatrix = matrix_multiply(projectionMatrix, matrix_multiply(viewMatrix, modelMatrix))
+    needsDisplay = true
+  }
 }

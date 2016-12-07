@@ -98,10 +98,6 @@ vertex VertexOut vertexTransform(device VertexIn *vertices [[buffer(0)]],
   
   VertexOut out;
   out.position = uniforms.modelViewProjectionMatrix * float4(point_r3, 1.0);
-//  out.position = uniforms.modelViewProjectionMatrix * float4(vertices[VertexId].position.z,
-//                                                             vertices[VertexId].position.w,
-//                                                             vertices[VertexId].position.x,
-//                                                             1.0);
   out.colour = float4(vertices[VertexId].colour, 1.0);
   return out;
 }
