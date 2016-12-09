@@ -29,6 +29,8 @@ class MetalView: MTKView {
   var centre = float3(0.0, 0.0, 5.0)
   var fieldOfView: Float = 1.047197551196598
   
+  var modifierKey: Bool = false
+  
   var modelMatrix = matrix_identity_float4x4
   var viewMatrix = matrix_identity_float4x4
   var projectionMatrix = matrix_identity_float4x4
@@ -111,6 +113,10 @@ class MetalView: MTKView {
     verticesBuffer = device!.makeBuffer(bytes: vertices, length: MemoryLayout<Vertex>.size*vertices.count, options: [])
   }
   
+  override var acceptsFirstResponder: Bool {
+    return true
+  }
+  
   override func draw(_ dirtyRect: NSRect) {
 //    Swift.print("MetalView.draw(NSRect)")
     
@@ -122,8 +128,8 @@ class MetalView: MTKView {
     renderEncoder.setDepthStencilState(depthStencilState)
     renderEncoder.setRenderPipelineState(renderPipelineState!)
     
-    let colour = sin(CACurrentMediaTime())
-    clearColor = MTLClearColorMake(colour, colour, colour, 1.0)
+//    let colour = sin(CACurrentMediaTime())
+//    clearColor = MTLClearColorMake(colour, colour, colour, 1.0)
     
     renderEncoder.setVertexBuffer(verticesBuffer, offset: 0, at: 0)
     renderEncoder.setVertexBytes(&constants, length: MemoryLayout<Constants>.size, at: 1)
@@ -142,6 +148,21 @@ class MetalView: MTKView {
     needsDisplay = true
   }
   
+  override func scrollWheel(with event: NSEvent) {
+    //    Swift.print("MetalView.scrollWheel()")
+    //    Swift.print("Scrolled X: \(event.scrollingDeltaX) Y: \(event.scrollingDeltaY)")
+    
+    // Motion according to trackpad
+    let scrollingSensitivity: Float = 0.003*(fieldOfView/(3.141519/4.0))
+    let motionInCameraCoordinates = float3(scrollingSensitivity*Float(event.scrollingDeltaX), -scrollingSensitivity*Float(event.scrollingDeltaY), 0.0)
+    var cameraToObject = matrix_invert(matrix_upper_left_3x3(matrix: matrix_multiply(viewMatrix, modelMatrix)))
+    let motionInObjectCoordinates = matrix_multiply(cameraToObject, motionInCameraCoordinates)
+    modelMatrix = matrix_multiply(modelMatrix, matrix4x4_translation(shift: motionInObjectCoordinates))
+    
+    // Put model matrix in arrays and render
+    constants.modelViewProjectionMatrix = matrix_multiply(projectionMatrix, matrix_multiply(viewMatrix, modelMatrix))
+  }
+  
   override func mouseDragged(with event: NSEvent) {
     let viewFrameInWindowCoordinates = convert(bounds, to: nil)
     
@@ -155,17 +176,41 @@ class MetalView: MTKView {
     }
     
     // Compute the motions and apply them
-    let angleX = currentX-lastX
-    let rotationXY = matrix_from_columns(vector4(cos(angleX), -sin(angleX), 0.0, 0.0),
-                                         vector4(sin(angleX), cos(angleX), 0.0, 0.0),
-                                         vector4(0.0, 0.0, 1.0, 0.0),
-                                         vector4(0.0, 0.0, 0.0, 1.0))
-    let angleY = currentY-lastY
-    let rotationZW = matrix_from_columns(vector4(1.0, 0.0, 0.0, 0.0),
-                                         vector4(0.0, 1.0, 0.0, 0.0),
-                                         vector4(0.0, 0.0, cos(angleY), -sin(angleY)),
-                                         vector4(0.0, 0.0, sin(angleY), cos(angleY)))
-    constants.transformationMatrix = matrix_multiply(rotationXY, constants.transformationMatrix)
-    constants.transformationMatrix = matrix_multiply(rotationZW, constants.transformationMatrix)
+    if !modifierKey {
+      let angleX = currentX-lastX
+      let rotationXY = matrix_from_columns(vector4(cos(angleX), -sin(angleX), 0.0, 0.0),
+                                           vector4(sin(angleX), cos(angleX), 0.0, 0.0),
+                                           vector4(0.0, 0.0, 1.0, 0.0),
+                                           vector4(0.0, 0.0, 0.0, 1.0))
+      let angleY = currentY-lastY
+      let rotationZW = matrix_from_columns(vector4(1.0, 0.0, 0.0, 0.0),
+                                           vector4(0.0, 1.0, 0.0, 0.0),
+                                           vector4(0.0, 0.0, cos(angleY), -sin(angleY)),
+                                           vector4(0.0, 0.0, sin(angleY), cos(angleY)))
+      constants.transformationMatrix = matrix_multiply(rotationXY, constants.transformationMatrix)
+      constants.transformationMatrix = matrix_multiply(rotationZW, constants.transformationMatrix)
+    } else {
+      let angleX = currentX-lastX
+      let rotationYZ = matrix_from_columns(vector4(1.0, 0.0, 0.0, 0.0),
+                                           vector4(0.0, cos(angleX), -sin(angleX), 0.0),
+                                           vector4(0.0, sin(angleX), cos(angleX), 0.0),
+                                           vector4(0.0, 0.0, 0.0, 1.0))
+      let angleY = currentY-lastY
+      let rotationWX = matrix_from_columns(vector4(cos(angleY), 0.0, 0.0, sin(angleY)),
+                                           vector4(0.0, 1.0, 0.0, 0.0),
+                                           vector4(0.0, 0.0, 1.0, 0.0),
+                                           vector4(-sin(angleY), 0.0, 0.0, cos(angleY)))
+      constants.transformationMatrix = matrix_multiply(rotationYZ, constants.transformationMatrix)
+      constants.transformationMatrix = matrix_multiply(rotationWX, constants.transformationMatrix)
+    }
+  }
+  
+  override func flagsChanged(with event: NSEvent) {
+    Swift.print("Flags changed: \(event.modifierFlags.contains(.command) || event.modifierFlags.contains(.shift))")
+    if event.modifierFlags.contains(.command) || event.modifierFlags.contains(.shift) {
+      modifierKey = true
+    } else {
+      modifierKey = false
+    }
   }
 }
