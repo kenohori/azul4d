@@ -19,11 +19,12 @@ using namespace metal;
 
 struct Constants {
   float4x4 modelViewProjectionMatrix;
+  float4x4 transformationMatrix;
 };
 
 struct VertexIn {
   float4 position;
-  float3 colour;
+  float4 colour;
 };
 
 struct VertexOut {
@@ -35,48 +36,51 @@ vertex VertexOut vertexTransform(device VertexIn *vertices [[buffer(0)]],
                                  constant Constants &uniforms [[buffer(1)]],
                                  uint VertexId [[vertex_id]]) {
   
+  // Apply 4D transformation
+  float4 transformedVertex = uniforms.transformationMatrix * vertices[VertexId].position;
+  
   // Project from R4 to S3
-  float r = sqrt(vertices[VertexId].position.x*vertices[VertexId].position.x+
-                 vertices[VertexId].position.y*vertices[VertexId].position.y+
-                 vertices[VertexId].position.z*vertices[VertexId].position.z+
-                 vertices[VertexId].position.w*vertices[VertexId].position.w);
+  float r = sqrt(transformedVertex.x*transformedVertex.x+
+                 transformedVertex.y*transformedVertex.y+
+                 transformedVertex.z*transformedVertex.z+
+                 transformedVertex.w*transformedVertex.w);
   float3 point_s3;
   
   if (r != 0) {
-    point_s3.x = acos(vertices[VertexId].position.x/r);
+    point_s3.x = acos(transformedVertex.x/r);
   } else {
-    if (vertices[VertexId].position.x >= 0) {
+    if (transformedVertex.x >= 0) {
       point_s3.x = 0;
     } else {
       point_s3.x = 3.141592653589793;
     }
   }
   
-  if (vertices[VertexId].position.y*vertices[VertexId].position.y+
-      vertices[VertexId].position.z*vertices[VertexId].position.z+
-      vertices[VertexId].position.w*vertices[VertexId].position.w != 0) {
-    point_s3.y = acos(vertices[VertexId].position.y/sqrt(vertices[VertexId].position.y*vertices[VertexId].position.y+
-                                                         vertices[VertexId].position.z*vertices[VertexId].position.z+
-                                                         vertices[VertexId].position.w*vertices[VertexId].position.w));
+  if (transformedVertex.y*transformedVertex.y+
+      transformedVertex.z*transformedVertex.z+
+      transformedVertex.w*transformedVertex.w != 0) {
+    point_s3.y = acos(transformedVertex.y/sqrt(transformedVertex.y*transformedVertex.y+
+                                                         transformedVertex.z*transformedVertex.z+
+                                                         transformedVertex.w*transformedVertex.w));
   } else {
-    if (vertices[VertexId].position.y >= 0) {
+    if (transformedVertex.y >= 0) {
       point_s3.y = 0;
     } else {
       point_s3.y = 3.141592653589793;
     }
   }
   
-  if (vertices[VertexId].position.z*vertices[VertexId].position.z+
-      vertices[VertexId].position.w*vertices[VertexId].position.w != 0) {
-    if (vertices[VertexId].position.w >= 0) {
-      point_s3.z = acos(vertices[VertexId].position.z/sqrt(vertices[VertexId].position.z*vertices[VertexId].position.z+
-                                                           vertices[VertexId].position.w*vertices[VertexId].position.w));
+  if (transformedVertex.z*transformedVertex.z+
+      transformedVertex.w*transformedVertex.w != 0) {
+    if (transformedVertex.w >= 0) {
+      point_s3.z = acos(transformedVertex.z/sqrt(transformedVertex.z*transformedVertex.z+
+                                                           transformedVertex.w*transformedVertex.w));
     } else {
-      point_s3.z = -acos(vertices[VertexId].position.z/sqrt(vertices[VertexId].position.z*vertices[VertexId].position.z+
-                                                            vertices[VertexId].position.w*vertices[VertexId].position.w));
+      point_s3.z = -acos(transformedVertex.z/sqrt(transformedVertex.z*transformedVertex.z+
+                                                            transformedVertex.w*transformedVertex.w));
     }
   } else {
-    if (vertices[VertexId].position.w >= 0) {
+    if (transformedVertex.w >= 0) {
       point_s3.z = 0;
     } else {
       point_s3.z = 3.141592653589793;
@@ -98,7 +102,7 @@ vertex VertexOut vertexTransform(device VertexIn *vertices [[buffer(0)]],
   
   VertexOut out;
   out.position = uniforms.modelViewProjectionMatrix * float4(point_r3, 1.0);
-  out.colour = float4(vertices[VertexId].colour, 1.0);
+  out.colour = vertices[VertexId].colour;
   return out;
 }
 

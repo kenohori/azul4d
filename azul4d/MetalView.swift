@@ -11,11 +11,12 @@ import MetalKit
 
 struct Constants {
   var modelViewProjectionMatrix = matrix_identity_float4x4
+  var transformationMatrix = matrix_identity_float4x4
 }
 
 struct Vertex {
   var position: float4
-  var colour: float3
+  var colour: float4
 }
 
 class MetalView: MTKView {
@@ -58,6 +59,11 @@ class MetalView: MTKView {
     renderPipelineDescriptor.vertexFunction = vertexFunction
     renderPipelineDescriptor.fragmentFunction = fragmentFunction
     renderPipelineDescriptor.colorAttachments[0].pixelFormat = colorPixelFormat
+    renderPipelineDescriptor.colorAttachments[0].isBlendingEnabled = true
+    renderPipelineDescriptor.colorAttachments[0].sourceRGBBlendFactor = .sourceAlpha
+    renderPipelineDescriptor.colorAttachments[0].sourceAlphaBlendFactor = .sourceAlpha
+    renderPipelineDescriptor.colorAttachments[0].destinationRGBBlendFactor = .oneMinusSourceAlpha
+    renderPipelineDescriptor.colorAttachments[0].destinationAlphaBlendFactor = .oneMinusSourceAlpha
     renderPipelineDescriptor.depthAttachmentPixelFormat = depthStencilPixelFormat
     do {
       renderPipelineState = try device!.makeRenderPipelineState(descriptor: renderPipelineDescriptor)
@@ -76,6 +82,7 @@ class MetalView: MTKView {
     modelMatrix = matrix4x4_translation(shift: centre)
     viewMatrix = matrix4x4_look_at(eye: eye, centre: centre, up: float3(0.0, 1.0, 0.0))
     projectionMatrix = matrix4x4_perspective(fieldOfView: fieldOfView, aspectRatio: Float(bounds.size.width / bounds.size.height), nearZ: 0.01, farZ: 10.0)
+    
     constants.modelViewProjectionMatrix = matrix_multiply(projectionMatrix, matrix_multiply(viewMatrix, modelMatrix))
     
     // Data
@@ -90,11 +97,16 @@ class MetalView: MTKView {
         let pointCoordinatesArray = ContiguousArray(pointCoordinatesBuffer)
         let pointCoordinates = [Float](pointCoordinatesArray)
 //        Swift.print(pointCoordinates)
-        vertices.append(Vertex(position: float4(pointCoordinates[0], pointCoordinates[1], pointCoordinates[2], pointCoordinates[3]), colour: float3(1.0, 0.0, 0.0)))
+        vertices.append(Vertex(position: float4(pointCoordinates[0], pointCoordinates[1], pointCoordinates[2], pointCoordinates[3]), colour: float4(0.0, 0.0, 1.0, 0.5)))
         cppLink.advancePointIterator()
       }
       cppLink.advancePolygonIterator()
     }
+    
+    // Other side?
+//    var verticesOtherSide: [Vertex] = vertices.reversed()
+//    vertices.append(contentsOf: verticesOtherSide)
+    
 //    Swift.print(vertices.count)
     verticesBuffer = device!.makeBuffer(bytes: vertices, length: MemoryLayout<Vertex>.size*vertices.count, options: [])
   }
@@ -128,5 +140,32 @@ class MetalView: MTKView {
     projectionMatrix = matrix4x4_perspective(fieldOfView: fieldOfView, aspectRatio: Float(bounds.size.width / bounds.size.height), nearZ: 0.001, farZ: 100.0)
     constants.modelViewProjectionMatrix = matrix_multiply(projectionMatrix, matrix_multiply(viewMatrix, modelMatrix))
     needsDisplay = true
+  }
+  
+  override func mouseDragged(with event: NSEvent) {
+    let viewFrameInWindowCoordinates = convert(bounds, to: nil)
+    
+    // Compute the current and last mouse positions
+    let currentX: Float = Float((window!.mouseLocationOutsideOfEventStream.x-viewFrameInWindowCoordinates.origin.x) / bounds.size.width)
+    let currentY: Float = Float((window!.mouseLocationOutsideOfEventStream.y-viewFrameInWindowCoordinates.origin.y) / bounds.size.height)
+    let lastX: Float = Float(((window!.mouseLocationOutsideOfEventStream.x-viewFrameInWindowCoordinates.origin.x)-event.deltaX) / bounds.size.width)
+    let lastY: Float = Float(((window!.mouseLocationOutsideOfEventStream.y-viewFrameInWindowCoordinates.origin.y)+event.deltaY) / bounds.size.height)
+    if currentX == lastX && currentY == lastY {
+      return
+    }
+    
+    // Compute the motions and apply them
+    let angleX = currentX-lastX
+    let rotationXY = matrix_from_columns(vector4(cos(angleX), -sin(angleX), 0.0, 0.0),
+                                         vector4(sin(angleX), cos(angleX), 0.0, 0.0),
+                                         vector4(0.0, 0.0, 1.0, 0.0),
+                                         vector4(0.0, 0.0, 0.0, 1.0))
+    let angleY = currentY-lastY
+    let rotationZW = matrix_from_columns(vector4(1.0, 0.0, 0.0, 0.0),
+                                         vector4(0.0, 1.0, 0.0, 0.0),
+                                         vector4(0.0, 0.0, cos(angleY), -sin(angleY)),
+                                         vector4(0.0, 0.0, sin(angleY), cos(angleY)))
+    constants.transformationMatrix = matrix_multiply(rotationXY, constants.transformationMatrix)
+    constants.transformationMatrix = matrix_multiply(rotationZW, constants.transformationMatrix)
   }
 }
