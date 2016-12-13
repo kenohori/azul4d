@@ -62,6 +62,8 @@ class MetalView: MTKView {
     renderPipelineDescriptor.fragmentFunction = fragmentFunction
     renderPipelineDescriptor.colorAttachments[0].pixelFormat = colorPixelFormat
     renderPipelineDescriptor.colorAttachments[0].isBlendingEnabled = true
+    renderPipelineDescriptor.colorAttachments[0].rgbBlendOperation = .add
+    renderPipelineDescriptor.colorAttachments[0].alphaBlendOperation = .add
     renderPipelineDescriptor.colorAttachments[0].sourceRGBBlendFactor = .sourceAlpha
     renderPipelineDescriptor.colorAttachments[0].sourceAlphaBlendFactor = .sourceAlpha
     renderPipelineDescriptor.colorAttachments[0].destinationRGBBlendFactor = .oneMinusSourceAlpha
