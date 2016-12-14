@@ -92,19 +92,22 @@ class MetalView: MTKView {
     // Data
     var vertices = [Vertex]()
     let cppLink = CppLinkWrapperWrapper()!
-    cppLink.initialiseTesseract()
-    while !cppLink.polygonIteratorEnded() {
-      cppLink.initialisePointIterator()
-      while !cppLink.pointIteratorEnded() {
-        let firstPointCoordinate = cppLink.currentPoint()
-        let pointCoordinatesBuffer = UnsafeBufferPointer(start: firstPointCoordinate, count: 4)
-        let pointCoordinatesArray = ContiguousArray(pointCoordinatesBuffer)
-        let pointCoordinates = [Float](pointCoordinatesArray)
-//        Swift.print(pointCoordinates)
-        vertices.append(Vertex(position: float4(pointCoordinates[0], pointCoordinates[1], pointCoordinates[2], pointCoordinates[3]), colour: float4(0.0, 0.0, 1.0, 0.5)))
-        cppLink.advancePointIterator()
+    cppLink.makeTesseract()
+    cppLink.initialiseMeshIterator()
+    while !cppLink.meshIteratorEnded() {
+      cppLink.initialiseTriangleIterator()
+      while !cppLink.triangleIteratorEnded() {
+        for pointIndex in 0..<3 {
+          let firstPointCoordinate = cppLink.currentTriangleVertex(pointIndex)
+          let pointCoordinatesBuffer = UnsafeBufferPointer(start: firstPointCoordinate, count: 4)
+          let pointCoordinatesArray = ContiguousArray(pointCoordinatesBuffer)
+          let pointCoordinates = [Float](pointCoordinatesArray)
+//          Swift.print(pointCoordinates)
+          vertices.append(Vertex(position: float4(pointCoordinates[0], pointCoordinates[1], pointCoordinates[2], pointCoordinates[3]), colour: float4(0.0, 0.0, 1.0, 0.5)))
+        }
+        cppLink.advanceTriangleIterator()
       }
-      cppLink.advancePolygonIterator()
+      cppLink.advanceMeshIterator()
     }
     
     // Other side?
@@ -157,7 +160,7 @@ class MetalView: MTKView {
     // Motion according to trackpad
     let scrollingSensitivity: Float = 0.003*(fieldOfView/(3.141519/4.0))
     let motionInCameraCoordinates = float3(scrollingSensitivity*Float(event.scrollingDeltaX), -scrollingSensitivity*Float(event.scrollingDeltaY), 0.0)
-    var cameraToObject = matrix_invert(matrix_upper_left_3x3(matrix: matrix_multiply(viewMatrix, modelMatrix)))
+    let cameraToObject = matrix_invert(matrix_upper_left_3x3(matrix: matrix_multiply(viewMatrix, modelMatrix)))
     let motionInObjectCoordinates = matrix_multiply(cameraToObject, motionInCameraCoordinates)
     modelMatrix = matrix_multiply(modelMatrix, matrix4x4_translation(shift: motionInObjectCoordinates))
     

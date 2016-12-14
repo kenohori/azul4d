@@ -22,35 +22,38 @@ struct CppLinkWrapper {
   } return self;
 }
 
-- (void) initialiseTesseract {
+- (void) makeTesseract {
   cppLinkWrapper->cppLink->makeTesseract();
-  cppLinkWrapper->cppLink->currentPolygon = cppLinkWrapper->cppLink->currentModel.begin();
 }
 
-- (void) advancePolygonIterator {
-  ++cppLinkWrapper->cppLink->currentPolygon;
+- (void) initialiseMeshIterator {
+  cppLinkWrapper->cppLink->currentMesh = cppLinkWrapper->cppLink->currentModel.begin();
 }
 
-- (BOOL) polygonIteratorEnded {
-  return cppLinkWrapper->cppLink->currentPolygon == cppLinkWrapper->cppLink->currentModel.end();
+- (void) advanceMeshIterator {
+  ++cppLinkWrapper->cppLink->currentMesh;
 }
 
-- (void) initialisePointIterator {
-  cppLinkWrapper->cppLink->currentPoint = cppLinkWrapper->cppLink->currentPolygon->points.begin();
+- (BOOL) meshIteratorEnded {
+  return cppLinkWrapper->cppLink->currentMesh == cppLinkWrapper->cppLink->currentModel.end();
 }
 
-- (void) advancePointIterator {
-  ++cppLinkWrapper->cppLink->currentPoint;
+- (void) initialiseTriangleIterator {
+  cppLinkWrapper->cppLink->currentTriangle = cppLinkWrapper->cppLink->currentMesh->triangles.begin();
 }
 
-- (BOOL) pointIteratorEnded {
-  return cppLinkWrapper->cppLink->currentPoint == cppLinkWrapper->cppLink->currentPolygon->points.end();
+- (void) advanceTriangleIterator {
+  ++cppLinkWrapper->cppLink->currentTriangle;
 }
 
-- (const float *)currentPoint {
+- (BOOL) triangleIteratorEnded {
+  return cppLinkWrapper->cppLink->currentTriangle == cppLinkWrapper->cppLink->currentMesh->triangles.end();
+}
+
+- (const float *)currentTriangleVertex: (long)index {
   for (unsigned int i = 0; i < 4; ++i) {
-    cppLinkWrapper->cppLink->currentPointCoordinates[i] = cppLinkWrapper->cppLink->currentPoint->cartesian(i);
-  } return cppLinkWrapper->cppLink->currentPointCoordinates;
+    cppLinkWrapper->cppLink->currentPointCoordinates[i] = cppLinkWrapper->cppLink->currentTriangle->vertices[index].cartesian(i);
+  } return cppLinkWrapper->cppLink->currentPointCoordinates; 
 }
 
 - (void) dealloc {

@@ -18,13 +18,14 @@ struct CppLinkWrapper;
 }
 
 - (id) init;
-- (void) initialiseTesseract;
-- (void) advancePolygonIterator;
-- (BOOL) polygonIteratorEnded;
-- (void) initialisePointIterator;
-- (void) advancePointIterator;
-- (BOOL) pointIteratorEnded;
-- (const float *)currentPoint;
+- (void) makeTesseract;
+- (void) initialiseMeshIterator;
+- (void) advanceMeshIterator;
+- (BOOL) meshIteratorEnded;
+- (void) initialiseTriangleIterator;
+- (void) advanceTriangleIterator;
+- (BOOL) triangleIteratorEnded;
+- (const float *)currentTriangleVertex: (long)index;
 - (void) dealloc;
 
 @end

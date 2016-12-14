@@ -31,18 +31,28 @@ typedef CGAL::Triangulation_data_structure_2<Vertex_base, Face_base> TDS;
 typedef CGAL::Constrained_Delaunay_triangulation_2<Triangulation_kernel, TDS> CDT;
 
 struct Polygon_d {
-  std::vector<CGAL::Point_d<Kernel>> points;
+  std::vector<CGAL::Point_d<Kernel>> vertices;
+};
+
+struct Triangle_d {
+  CGAL::Point_d<Kernel> vertices[3];
+};
+
+struct Mesh_d {
+  std::vector<Triangle_d> triangles;
+  float colour[4];
 };
 
 class CppLink {
 public:
-  std::list<Polygon_d> currentModel;
-  std::list<Polygon_d>::const_iterator currentPolygon;
+  std::vector<Mesh_d> currentModel;
+  std::vector<Mesh_d>::const_iterator currentMesh;
+  std::vector<Triangle_d>::const_iterator currentTriangle;
   std::vector<CGAL::Point_d<Kernel>>::const_iterator currentPoint;
   float currentPointCoordinates[4];
   
-  Polygon_d refine(Polygon_d &polygon, double ratio, double size);
-  Polygon_d triangulate(Polygon_d &polygon);
+  Mesh_d refine(Polygon_d &polygon, double ratio, double size);
+  Mesh_d triangulate(Polygon_d &polygon);
   
   void makeTesseract();
 };
