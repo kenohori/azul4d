@@ -57,6 +57,37 @@ Polygon_d CppLink::refine(Polygon_d &polygon, double ratio, double size) {
   return polygon_refined;
 }
 
+Polygon_d CppLink::triangulate(Polygon_d &polygon) {
+  
+  Polygon_d polygon_triangulated;
+  
+  // Compute the centroid
+  double centroid[4] = {0.0, 0.0, 0.0, 0.0};
+  for (auto const &point : polygon.points) {
+    for (unsigned int currentCoordinate = 0; currentCoordinate < 4; ++currentCoordinate) {
+      centroid[currentCoordinate] += point.cartesian(currentCoordinate);
+    }
+  } for (unsigned int currentCoordinate = 0; currentCoordinate < 4; ++currentCoordinate) {
+    centroid[currentCoordinate] /= polygon.points.size();
+  } CGAL::Point_d<Kernel> centroidPoint(4, centroid, centroid+4);
+  
+  // Barycentric triangulation
+  std::vector<CGAL::Point_d<Kernel>>::const_iterator previousPoint = polygon.points.begin();
+  std::vector<CGAL::Point_d<Kernel>>::const_iterator currentPoint = previousPoint;
+  ++currentPoint;
+  while (currentPoint != polygon.points.end()) {
+    polygon_triangulated.points.push_back(centroidPoint);
+    polygon_triangulated.points.push_back(*previousPoint);
+    polygon_triangulated.points.push_back(*currentPoint);
+    ++previousPoint;
+    ++currentPoint;
+  } polygon_triangulated.points.push_back(centroidPoint);
+  polygon_triangulated.points.push_back(polygon.points.back());
+  polygon_triangulated.points.push_back(polygon.points.front());
+  
+  return polygon_triangulated;
+}
+
 void CppLink::makeTesseract() {
   std::list<Polygon_d> tesseract;
   
@@ -254,7 +285,8 @@ void CppLink::makeTesseract() {
   
   std::list<Polygon_d> tesseract_refined;
   for (auto &polygon : tesseract) {
-    tesseract_refined.push_back(refine(polygon, 0.125, 0.1));
+//    tesseract_refined.push_back(refine(polygon, 0.125, 0.1));
+    tesseract_refined.push_back(triangulate(polygon));
   }
   
   currentModel = tesseract_refined;

@@ -42,6 +42,7 @@ public:
   float currentPointCoordinates[4];
   
   Polygon_d refine(Polygon_d &polygon, double ratio, double size);
+  Polygon_d triangulate(Polygon_d &polygon);
   
   void makeTesseract();
 };
