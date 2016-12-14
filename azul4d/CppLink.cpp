@@ -285,8 +285,8 @@ void CppLink::makeTesseract() {
   
   std::list<Polygon_d> tesseract_refined;
   for (auto &polygon : tesseract) {
-//    tesseract_refined.push_back(refine(polygon, 0.125, 0.1));
-    tesseract_refined.push_back(triangulate(polygon));
+    tesseract_refined.push_back(refine(polygon, 0.125, 0.1));
+//    tesseract_refined.push_back(triangulate(polygon));
   }
   
   currentModel = tesseract_refined;

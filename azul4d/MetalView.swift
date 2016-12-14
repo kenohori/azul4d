@@ -79,7 +79,7 @@ class MetalView: MTKView {
     // Depth stencil
     let depthSencilDescriptor = MTLDepthStencilDescriptor()
     depthSencilDescriptor.depthCompareFunction = .less
-    depthSencilDescriptor.isDepthWriteEnabled = true
+//    depthSencilDescriptor.isDepthWriteEnabled = true
     depthStencilState = device!.makeDepthStencilState(descriptor: depthSencilDescriptor)
     
     // Matrices
