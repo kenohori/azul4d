@@ -386,3 +386,435 @@ void CppLink::makeTesseract() {
   currentModelEdges = generate_edges(tesseract, 0.1, 0.01, 4);
   currentModelVertices = generate_vertices(tesseract, 0.2, 2);
 }
+
+void CppLink::makeHouse() {
+  
+  std::vector<Polygon_d> house;
+  
+  double point_coordinates[][4] = {
+    {-1, -1, -1, -1}, // 0
+    {1, -1, -1, -1}, // 1
+    {-1, 1, -1, -1}, // 2
+    {1, 1, -1, -1}, // 3
+    {-1, -1, 1, -1}, // 4
+    {1, -1, 1, -1}, // 5
+    {-1, 1, 1, -1}, // 6
+    {1, 1, 1, -1}, // 7 -- end of first house
+    
+    {-1, -1, -1, 1}, // 8
+    {1, -1, -1, 1}, // 9
+    {-1, 1, -1, 1}, // 10
+    {1, 1, -1, 1}, // 11
+    {-1, -1, 1, 1}, // 12
+    {1, -1, 1, 1}, // 13
+    {-1, 1, 1, 1}, // 14
+    {1, 1, 1, 1}, // 15 -- end of base of second house
+    
+    {0, 0, 2, 3}, // 16 -- top of the roof
+    
+    {-0.5, -1, -1, 1}, // 17
+    {-0.5, -1, 0.5, 1}, // 18
+    {0, -1, 0.5, 1}, // 19
+    {0, -1, -1, 1}, // 20 -- door for second house
+    
+    {0.25, -1, -0.5, 1}, // 21
+    {0.25, -1, 0.5, 1}, // 22
+    {0.75, -1, 0.5, 1}, // 23
+    {0.75, -1, -0.5, 1} // 24 -- window 1
+  };
+  
+  std::map<int, std::tuple<double, double, double>> materials;
+  std::vector<int> materialOfFace;
+  materials[0] = std::tuple<double, double, double>(0.7, 0.7, 0.7); // 0 -- walls
+  materials[1] = std::tuple<double, double, double>(1.0, 0.0, 0.0); // 1 -- roof
+  materials[2] = std::tuple<double, double, double>(0.7, 0.35, 0.17); // 2 -- door
+  materials[3] = std::tuple<double, double, double>(0.0, 1.0, 0.0); // 3 -- grass
+  materials[4] = std::tuple<double, double, double>(0.0, 1.0, 0.0); // 4 -- base
+  materials[5] = std::tuple<double, double, double>(0.0, 0.0, 0.0); // 5 -- edges
+  materials[6] = std::tuple<double, double, double>(0.3, 0.3, 1.0); // 6 -- window
+  
+  std::vector<CGAL::Point_d<Kernel>> points;
+  for (int i = 0; i < 25; ++i) {
+    points.push_back(CGAL::Point_d<Kernel>(4, point_coordinates[i], point_coordinates[i]+4));
+  }
+  
+  // 0: Base of first house
+  materialOfFace.push_back(4);
+  house.push_back(Polygon_d());
+  house.back().vertices.push_back(points[0]);
+  house.back().vertices.push_back(points[1]);
+  house.back().vertices.push_back(points[3]);
+  house.back().vertices.push_back(points[2]);
+  
+  // 1: Back of first house
+  materialOfFace.push_back(0);
+	house.push_back(Polygon_d());
+  house.back().vertices.push_back(points[2]);
+  house.back().vertices.push_back(points[3]);
+  house.back().vertices.push_back(points[7]);
+  house.back().vertices.push_back(points[6]);
+  
+  // 2: Left of first house
+  materialOfFace.push_back(0);
+  house.push_back(Polygon_d());
+  house.back().vertices.push_back(points[0]);
+  house.back().vertices.push_back(points[2]);
+  house.back().vertices.push_back(points[6]);
+  house.back().vertices.push_back(points[4]);
+  
+  // 3: Front of first house
+  materialOfFace.push_back(0);
+  house.push_back(Polygon_d());
+  house.back().vertices.push_back(points[0]);
+  house.back().vertices.push_back(points[1]);
+  house.back().vertices.push_back(points[5]);
+  house.back().vertices.push_back(points[4]);
+  
+  // 4: Right of first house
+  materialOfFace.push_back(0);
+  house.push_back(Polygon_d());
+  house.back().vertices.push_back(points[1]);
+  house.back().vertices.push_back(points[3]);
+  house.back().vertices.push_back(points[7]);
+  house.back().vertices.push_back(points[5]);
+  
+  // 5: Top of first house
+  materialOfFace.push_back(1);
+  house.push_back(Polygon_d());
+  house.back().vertices.push_back(points[4]);
+  house.back().vertices.push_back(points[5]);
+  house.back().vertices.push_back(points[7]);
+  house.back().vertices.push_back(points[6]);
+  
+  // 6: Base of second house
+  materialOfFace.push_back(4);
+  house.push_back(Polygon_d());
+  house.back().vertices.push_back(points[8]);
+  house.back().vertices.push_back(points[9]);
+  house.back().vertices.push_back(points[11]);
+  house.back().vertices.push_back(points[10]);
+  
+  // 7: Back of second house
+  materialOfFace.push_back(0);
+  house.push_back(Polygon_d());
+  house.back().vertices.push_back(points[10]);
+  house.back().vertices.push_back(points[11]);
+  house.back().vertices.push_back(points[15]);
+  house.back().vertices.push_back(points[14]);
+  
+  // 8: Left of second house
+  materialOfFace.push_back(0);
+  house.push_back(Polygon_d());
+  house.back().vertices.push_back(points[8]);
+  house.back().vertices.push_back(points[10]);
+  house.back().vertices.push_back(points[14]);
+  house.back().vertices.push_back(points[12]);
+  
+  // 9: Front of second house (one piece)
+  materialOfFace.push_back(0);
+  house.push_back(Polygon_d());
+  house.back().vertices.push_back(points[8]);
+  house.back().vertices.push_back(points[17]);
+  house.back().vertices.push_back(points[18]);
+  house.back().vertices.push_back(points[19]);
+  house.back().vertices.push_back(points[20]);
+  house.back().vertices.push_back(points[9]);
+  house.back().vertices.push_back(points[13]);
+  house.back().vertices.push_back(points[12]);
+  
+  // 9: Front of second house (by parts)
+//  materialOfFace.push_back(0);
+//  house.push_back(Polygon_d());
+//  house.back().vertices.push_back(points[12]);
+//  house.back().vertices.push_back(points[13]);
+//  house.back().vertices.push_back(points[23]);
+//  house.back().vertices.push_back(points[18]);
+//  materialOfFace.push_back(0);
+//  house.push_back(Polygon_d());
+//  house.back().vertices.push_back(points[12]);
+//  house.back().vertices.push_back(points[18]);
+//  house.back().vertices.push_back(points[17]);
+//  house.back().vertices.push_back(points[8]);
+//  materialOfFace.push_back(0);
+//  house.push_back(Polygon_d());
+//  house.back().vertices.push_back(points[19]);
+//  house.back().vertices.push_back(points[22]);
+//  house.back().vertices.push_back(points[21]);
+//  house.back().vertices.push_back(points[20]);
+//  materialOfFace.push_back(0);
+//  house.push_back(Polygon_d());
+//  house.back().vertices.push_back(points[20]);
+//  house.back().vertices.push_back(points[21]);
+//  house.back().vertices.push_back(points[24]);
+//  house.back().vertices.push_back(points[9]);
+//  materialOfFace.push_back(0);
+//  house.push_back(Polygon_d());
+//  house.back().vertices.push_back(points[9]);
+//  house.back().vertices.push_back(points[24]);
+//  house.back().vertices.push_back(points[23]);
+//  house.back().vertices.push_back(points[13]);
+  
+  //10: Right of second house
+  materialOfFace.push_back(0);
+  house.push_back(Polygon_d());
+  house.back().vertices.push_back(points[9]);
+  house.back().vertices.push_back(points[11]);
+  house.back().vertices.push_back(points[15]);
+  house.back().vertices.push_back(points[13]);
+  
+  //11: Front top of the second house
+  materialOfFace.push_back(1);
+  house.push_back(Polygon_d());
+  house.back().vertices.push_back(points[12]);
+  house.back().vertices.push_back(points[13]);
+  house.back().vertices.push_back(points[16]);
+  
+  //12: Left top of the second house
+  materialOfFace.push_back(1);
+  house.push_back(Polygon_d());
+  house.back().vertices.push_back(points[12]);
+  house.back().vertices.push_back(points[14]);
+  house.back().vertices.push_back(points[16]);
+  
+  //13: Back top of the second house
+  materialOfFace.push_back(1);
+  house.push_back(Polygon_d());
+  house.back().vertices.push_back(points[14]);
+  house.back().vertices.push_back(points[15]);
+  house.back().vertices.push_back(points[16]);
+  
+  //14: Right top of the second house
+  materialOfFace.push_back(1);
+  house.push_back(Polygon_d());
+  house.back().vertices.push_back(points[13]);
+  house.back().vertices.push_back(points[15]);
+  house.back().vertices.push_back(points[16]);
+  
+  //15: Front down edge
+  materialOfFace.push_back(0);
+  house.push_back(Polygon_d());
+  house.back().vertices.push_back(points[0]);
+  house.back().vertices.push_back(points[1]);
+  house.back().vertices.push_back(points[9]);
+  house.back().vertices.push_back(points[8]);
+  
+  //16: Left down edge
+  materialOfFace.push_back(0);
+  house.push_back(Polygon_d());
+  house.back().vertices.push_back(points[0]);
+  house.back().vertices.push_back(points[2]);
+  house.back().vertices.push_back(points[10]);
+  house.back().vertices.push_back(points[8]);
+  
+  //17: Back down edge
+  materialOfFace.push_back(0);
+  house.push_back(Polygon_d());
+  house.back().vertices.push_back(points[2]);
+  house.back().vertices.push_back(points[3]);
+  house.back().vertices.push_back(points[11]);
+  house.back().vertices.push_back(points[10]);
+  
+  //18: Right down edge
+  materialOfFace.push_back(0);
+  house.push_back(Polygon_d());
+  house.back().vertices.push_back(points[1]);
+  house.back().vertices.push_back(points[3]);
+  house.back().vertices.push_back(points[11]);
+  house.back().vertices.push_back(points[9]);
+  
+  //19: Front left vertical edge
+  materialOfFace.push_back(0);
+  house.push_back(Polygon_d());
+  house.back().vertices.push_back(points[0]);
+  house.back().vertices.push_back(points[4]);
+  house.back().vertices.push_back(points[12]);
+  house.back().vertices.push_back(points[8]);
+  
+  //20: Front right vertical edge
+  materialOfFace.push_back(0);
+  house.push_back(Polygon_d());
+  house.back().vertices.push_back(points[1]);
+  house.back().vertices.push_back(points[5]);
+  house.back().vertices.push_back(points[13]);
+  house.back().vertices.push_back(points[9]);
+  
+  //21: Back right vertical edge
+  materialOfFace.push_back(0);
+  house.push_back(Polygon_d());
+  house.back().vertices.push_back(points[3]);
+  house.back().vertices.push_back(points[7]);
+  house.back().vertices.push_back(points[15]);
+  house.back().vertices.push_back(points[11]);
+  
+  //22: Back left vertical edge
+  materialOfFace.push_back(0);
+  house.push_back(Polygon_d());
+  house.back().vertices.push_back(points[2]);
+  house.back().vertices.push_back(points[6]);
+  house.back().vertices.push_back(points[14]);
+  house.back().vertices.push_back(points[10]);
+  
+  //23: Front top edge
+  materialOfFace.push_back(1);
+  house.push_back(Polygon_d());
+  house.back().vertices.push_back(points[4]);
+  house.back().vertices.push_back(points[5]);
+  house.back().vertices.push_back(points[13]);
+  house.back().vertices.push_back(points[12]);
+  
+  //24: Left top edge
+  materialOfFace.push_back(1);
+  house.push_back(Polygon_d());
+  house.back().vertices.push_back(points[4]);
+  house.back().vertices.push_back(points[6]);
+  house.back().vertices.push_back(points[14]);
+  house.back().vertices.push_back(points[12]);
+  
+  //25: Back top edge
+  materialOfFace.push_back(1);
+  house.push_back(Polygon_d());
+  house.back().vertices.push_back(points[6]);
+  house.back().vertices.push_back(points[7]);
+  house.back().vertices.push_back(points[15]);
+  house.back().vertices.push_back(points[14]);
+  
+  //26: Right top edge
+  house.push_back(Polygon_d());
+  house.back().vertices.push_back(points[5]);
+  house.back().vertices.push_back(points[7]);
+  house.back().vertices.push_back(points[15]);
+  house.back().vertices.push_back(points[13]);
+  
+  //27: Front left hip
+  materialOfFace.push_back(1);
+  house.push_back(Polygon_d());
+  house.back().vertices.push_back(points[4]);
+  house.back().vertices.push_back(points[16]);
+  house.back().vertices.push_back(points[12]);
+  
+  //28: Back left hip
+  materialOfFace.push_back(1);
+  house.push_back(Polygon_d());
+  house.back().vertices.push_back(points[6]);
+  house.back().vertices.push_back(points[16]);
+  house.back().vertices.push_back(points[14]);
+  
+  //29: Back right hip
+  materialOfFace.push_back(1);
+  house.push_back(Polygon_d());
+  house.back().vertices.push_back(points[7]);
+  house.back().vertices.push_back(points[16]);
+  house.back().vertices.push_back(points[15]);
+  
+  //30: Front right hip
+  materialOfFace.push_back(1);
+  house.push_back(Polygon_d());
+  house.back().vertices.push_back(points[5]);
+  house.back().vertices.push_back(points[16]);
+  house.back().vertices.push_back(points[13]);
+  
+  //31: Front ridge
+  materialOfFace.push_back(1);
+  house.push_back(Polygon_d());
+  house.back().vertices.push_back(points[4]);
+  house.back().vertices.push_back(points[5]);
+  house.back().vertices.push_back(points[16]);
+  
+  //32: Left ridge
+  materialOfFace.push_back(1);
+  house.push_back(Polygon_d());
+  house.back().vertices.push_back(points[4]);
+  house.back().vertices.push_back(points[6]);
+  house.back().vertices.push_back(points[16]);
+  
+  //33: Back ridge
+  materialOfFace.push_back(1);
+  house.push_back(Polygon_d());
+  house.back().vertices.push_back(points[6]);
+  house.back().vertices.push_back(points[7]);
+  house.back().vertices.push_back(points[16]);
+  
+  //34: Right ridge
+  materialOfFace.push_back(1);
+  house.push_back(Polygon_d());
+  house.back().vertices.push_back(points[5]);
+  house.back().vertices.push_back(points[7]);
+  house.back().vertices.push_back(points[16]);
+  
+  //35: Door in second house
+  materialOfFace.push_back(2);
+  house.push_back(Polygon_d());
+  house.back().vertices.push_back(points[17]);
+  house.back().vertices.push_back(points[18]);
+  house.back().vertices.push_back(points[19]);
+  house.back().vertices.push_back(points[20]);
+  
+  //36: Door left edge collapses
+  materialOfFace.push_back(2);
+  house.push_back(Polygon_d());
+  house.back().vertices.push_back(points[0]);
+  house.back().vertices.push_back(points[17]);
+  house.back().vertices.push_back(points[18]);
+  
+  //37: Door top edge collapses
+  materialOfFace.push_back(2);
+  house.push_back(Polygon_d());
+  house.back().vertices.push_back(points[0]);
+  house.back().vertices.push_back(points[18]);
+  house.back().vertices.push_back(points[19]);
+  
+  //38: Door right edge collapses
+  materialOfFace.push_back(2);
+  house.push_back(Polygon_d());
+  house.back().vertices.push_back(points[0]);
+  house.back().vertices.push_back(points[19]);
+  house.back().vertices.push_back(points[20]);
+  
+  //39: Window
+  materialOfFace.push_back(6);
+  house.push_back(Polygon_d());
+  house.back().vertices.push_back(points[21]);
+  house.back().vertices.push_back(points[22]);
+  house.back().vertices.push_back(points[23]);
+  house.back().vertices.push_back(points[24]);
+  
+  //40: Window left edge collapses
+  materialOfFace.push_back(6);
+  house.push_back(Polygon_d());
+  house.back().vertices.push_back(points[21]);
+  house.back().vertices.push_back(points[22]);
+  house.back().vertices.push_back(points[1]);
+  
+  //41: Window top edge collapses
+  materialOfFace.push_back(6);
+  house.push_back(Polygon_d());
+  house.back().vertices.push_back(points[22]);
+  house.back().vertices.push_back(points[23]);
+  house.back().vertices.push_back(points[1]);
+  
+  //42: Window right edge collapses
+  materialOfFace.push_back(6);
+  house.push_back(Polygon_d());
+  house.back().vertices.push_back(points[23]);
+  house.back().vertices.push_back(points[24]);
+  house.back().vertices.push_back(points[1]);
+  
+  //43: Window bottom edge collapses
+  materialOfFace.push_back(6);
+  house.push_back(Polygon_d());
+  house.back().vertices.push_back(points[24]);
+  house.back().vertices.push_back(points[21]);
+  house.back().vertices.push_back(points[1]);
+  
+  std::vector<Mesh_d> house_refined;
+  for (unsigned int index = 0; index < house.size(); ++index) {
+    house_refined.push_back(refine(house[index], 0.125, 0.1));
+//    house_refined.push_back(triangulateQuad(house[index]));
+    house_refined.back().colour[0] = std::get<0>(materials[materialOfFace[index]]);
+    house_refined.back().colour[1] = std::get<1>(materials[materialOfFace[index]]);
+    house_refined.back().colour[2] = std::get<2>(materials[materialOfFace[index]]);
+    house_refined.back().colour[3] = 0.2;
+  } currentModelFaces = house_refined;
+  currentModelEdges = generate_edges(house, 0.1, 0.01, 4);
+  currentModelVertices = generate_vertices(house, 0.2, 2);
+}

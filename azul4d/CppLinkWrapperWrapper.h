@@ -19,6 +19,7 @@ struct CppLinkWrapper;
 
 - (id) init;
 - (void) makeTesseract;
+- (void) makeHouse;
 - (void) iterateOverFaces;
 - (void) iterateOverEdges;
 - (void) iterateOverVertices;

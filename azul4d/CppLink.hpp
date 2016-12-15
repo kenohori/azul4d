@@ -58,6 +58,7 @@ public:
   std::vector<Mesh_d> generate_vertices(std::vector<Polygon_d> &model, double radius, unsigned int icosphere_refinements);
   
   void makeTesseract();
+  void makeHouse();
 };
 
 #endif /* CppLink_hpp */

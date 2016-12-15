@@ -26,6 +26,10 @@ struct CppLinkWrapper {
   cppLinkWrapper->cppLink->makeTesseract();
 }
 
+- (void) makeHouse {
+  cppLinkWrapper->cppLink->makeHouse();
+}
+
 - (void) iterateOverFaces {
   cppLinkWrapper->cppLink->currentModelPart = cppLinkWrapper->cppLink->currentModelFaces;
 }
