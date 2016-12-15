@@ -45,13 +45,15 @@ struct Mesh_d {
 
 class CppLink {
 public:
-  std::vector<Mesh_d> currentModel;
+  std::vector<Mesh_d> currentModelFaces, currentModelEdges, currentModelVertices, currentModelPart;
   std::vector<Mesh_d>::const_iterator currentMesh;
   std::vector<Triangle_d>::const_iterator currentTriangle;
   std::vector<CGAL::Point_d<Kernel>>::const_iterator currentPoint;
   float currentPointCoordinates[4];
   
   Mesh_d refine(Polygon_d &polygon, double ratio, double size);
+  std::vector<Mesh_d> generate_edges(std::vector<Polygon_d> &model, double size, double radius, unsigned int circle_segments);
+  std::vector<Mesh_d> generate_vertices(std::vector<Polygon_d> &model, double radius, unsigned int icosphere_refinements);
   Mesh_d triangulate(Polygon_d &polygon);
   
   void makeTesseract();

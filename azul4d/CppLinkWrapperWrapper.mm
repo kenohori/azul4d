@@ -26,8 +26,20 @@ struct CppLinkWrapper {
   cppLinkWrapper->cppLink->makeTesseract();
 }
 
+- (void) iterateOverFaces {
+  cppLinkWrapper->cppLink->currentModelPart = cppLinkWrapper->cppLink->currentModelFaces;
+}
+
+- (void) iterateOverEdges {
+  cppLinkWrapper->cppLink->currentModelPart = cppLinkWrapper->cppLink->currentModelEdges;
+}
+
+- (void) iterateOverVertices {
+  cppLinkWrapper->cppLink->currentModelPart = cppLinkWrapper->cppLink->currentModelVertices;
+}
+
 - (void) initialiseMeshIterator {
-  cppLinkWrapper->cppLink->currentMesh = cppLinkWrapper->cppLink->currentModel.begin();
+  cppLinkWrapper->cppLink->currentMesh = cppLinkWrapper->cppLink->currentModelPart.begin();
 }
 
 - (void) advanceMeshIterator {
@@ -35,7 +47,7 @@ struct CppLinkWrapper {
 }
 
 - (BOOL) meshIteratorEnded {
-  return cppLinkWrapper->cppLink->currentMesh == cppLinkWrapper->cppLink->currentModel.end();
+  return cppLinkWrapper->cppLink->currentMesh == cppLinkWrapper->cppLink->currentModelPart.end();
 }
 
 - (void) initialiseTriangleIterator {

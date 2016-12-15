@@ -58,6 +58,71 @@ Mesh_d CppLink::refine(Polygon_d &polygon, double ratio, double size) {
   return polygon_refined;
 }
 
+std::vector<Mesh_d> CppLink::generate_edges(std::vector<Polygon_d> &model, double size, double radius, unsigned int circle_segments) {
+  std::vector<Mesh_d> edges_mesh;
+  
+  // Generate a unique set of edges
+  std::map<CGAL::Point_d<Kernel>, std::set<CGAL::Point_d<Kernel>>> edges;
+  for (auto const &polygon: model) {
+    std::vector<CGAL::Point_d<Kernel>>::const_iterator previousVertex = polygon.vertices.begin();
+    std::vector<CGAL::Point_d<Kernel>>::const_iterator currentVertex = previousVertex;
+    ++currentVertex;
+    while (currentVertex != polygon.vertices.end()) {
+      edges[*previousVertex].insert(*currentVertex);
+      ++previousVertex;
+      ++currentVertex;
+    }
+  }
+  
+  // Generates geometries
+  double angle = 2.0*M_PI/circle_segments;
+  for (auto const &edgeStart: edges) {
+    for (auto const &edgeEnd: edgeStart.second) {
+//      std::cout << "Edge (" << edgeStart.first << ", " << edgeEnd << ")" << std::endl;
+      
+    }
+  }
+  
+  return edges_mesh;
+}
+
+std::vector<Mesh_d> CppLink::generate_vertices(std::vector<Polygon_d> &model, double radius, unsigned int icosphere_refinements) {
+  std::vector<Mesh_d> vertices_mesh;
+  
+  // Generate a unique set of vertices
+  std::set<CGAL::Point_d<Kernel>> vertices;
+  for (auto const &polygon: model) {
+    for (auto const &vertex: polygon.vertices) {
+      vertices.insert(vertex);
+    }
+  }
+  
+  // Generates geometries
+  double golden_ratio = (1.0+sqrt(5.0))/2.0;
+  double normalising_factor = sqrt(golden_ratio*golden_ratio+1.0);
+  for (auto const &vertex: vertices) {
+//    std::cout << vertex << std::endl;
+    std::vector<CGAL::Point_3<Triangulation_kernel>> icosahedron_vertices;
+    
+    icosahedron_vertices.push_back(CGAL::Point_3<Triangulation_kernel>(-1.0/normalising_factor,  golden_ratio/normalising_factor, 0.0));
+    icosahedron_vertices.push_back(CGAL::Point_3<Triangulation_kernel>( 1.0/normalising_factor,  golden_ratio/normalising_factor, 0.0));
+    icosahedron_vertices.push_back(CGAL::Point_3<Triangulation_kernel>(-1.0/normalising_factor, -golden_ratio/normalising_factor, 0.0));
+    icosahedron_vertices.push_back(CGAL::Point_3<Triangulation_kernel>( 1.0/normalising_factor, -golden_ratio/normalising_factor, 0.0));
+    
+    icosahedron_vertices.push_back(CGAL::Point_3<Triangulation_kernel>(0.0, -1.0/normalising_factor,  golden_ratio/normalising_factor));
+    icosahedron_vertices.push_back(CGAL::Point_3<Triangulation_kernel>(0.0,  1.0/normalising_factor,  golden_ratio/normalising_factor));
+    icosahedron_vertices.push_back(CGAL::Point_3<Triangulation_kernel>(0.0, -1.0/normalising_factor, -golden_ratio/normalising_factor));
+    icosahedron_vertices.push_back(CGAL::Point_3<Triangulation_kernel>(0.0,  1.0/normalising_factor, -golden_ratio/normalising_factor));
+    
+    icosahedron_vertices.push_back(CGAL::Point_3<Triangulation_kernel>( golden_ratio/normalising_factor, 0.0, -1.0/normalising_factor));
+    icosahedron_vertices.push_back(CGAL::Point_3<Triangulation_kernel>( golden_ratio/normalising_factor, 0.0,  1.0/normalising_factor));
+    icosahedron_vertices.push_back(CGAL::Point_3<Triangulation_kernel>(-golden_ratio/normalising_factor, 0.0, -1.0/normalising_factor));
+    icosahedron_vertices.push_back(CGAL::Point_3<Triangulation_kernel>(-golden_ratio/normalising_factor, 0.0,  1.0/normalising_factor));
+  }
+  
+  return vertices_mesh;
+}
+
 Mesh_d CppLink::triangulate(Polygon_d &polygon) {
   
   Mesh_d polygon_triangulated;
@@ -294,7 +359,7 @@ void CppLink::makeTesseract() {
     tesseract_refined.back().colour[2] = 1.0;
     tesseract_refined.back().colour[3] = 0.2;
 //    tesseract_refined.push_back(triangulate(polygon));
-  }
-  
-  currentModel = tesseract_refined;
+  } currentModelFaces = tesseract_refined;
+  currentModelEdges = generate_edges(tesseract, 0.1, 0.01, 4);
+  currentModelVertices = generate_vertices(tesseract, 0.2, 2);
 }

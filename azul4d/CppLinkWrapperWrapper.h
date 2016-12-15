@@ -19,6 +19,9 @@ struct CppLinkWrapper;
 
 - (id) init;
 - (void) makeTesseract;
+- (void) iterateOverFaces;
+- (void) iterateOverEdges;
+- (void) iterateOverVertices;
 - (void) initialiseMeshIterator;
 - (void) advanceMeshIterator;
 - (BOOL) meshIteratorEnded;

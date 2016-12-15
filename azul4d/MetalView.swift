@@ -93,6 +93,7 @@ class MetalView: MTKView {
     var vertices = [Vertex]()
     let cppLink = CppLinkWrapperWrapper()!
     cppLink.makeTesseract()
+    cppLink.iterateOverFaces()
     cppLink.initialiseMeshIterator()
     while !cppLink.meshIteratorEnded() {
       cppLink.initialiseTriangleIterator()
