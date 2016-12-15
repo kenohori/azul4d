@@ -52,9 +52,10 @@ public:
   float currentPointCoordinates[4];
   
   Mesh_d refine(Polygon_d &polygon, double ratio, double size);
+  Mesh_d triangulateUsingBarycentre(Polygon_d &polygon);
+  Mesh_d triangulateQuad(Polygon_d &polygon);
   std::vector<Mesh_d> generate_edges(std::vector<Polygon_d> &model, double size, double radius, unsigned int circle_segments);
   std::vector<Mesh_d> generate_vertices(std::vector<Polygon_d> &model, double radius, unsigned int icosphere_refinements);
-  Mesh_d triangulate(Polygon_d &polygon);
   
   void makeTesseract();
 };

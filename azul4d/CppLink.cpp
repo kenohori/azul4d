@@ -123,7 +123,7 @@ std::vector<Mesh_d> CppLink::generate_vertices(std::vector<Polygon_d> &model, do
   return vertices_mesh;
 }
 
-Mesh_d CppLink::triangulate(Polygon_d &polygon) {
+Mesh_d CppLink::triangulateUsingBarycentre(Polygon_d &polygon) {
   
   Mesh_d polygon_triangulated;
   
@@ -152,6 +152,29 @@ Mesh_d CppLink::triangulate(Polygon_d &polygon) {
   polygon_triangulated.triangles.back().vertices[0] = centroidPoint;
   polygon_triangulated.triangles.back().vertices[1] = polygon.vertices.back();
   polygon_triangulated.triangles.back().vertices[2] = polygon.vertices.front();
+  
+  return polygon_triangulated;
+}
+
+Mesh_d CppLink::triangulateQuad(Polygon_d &polygon) {
+  
+  Mesh_d polygon_triangulated;
+  
+  // Barycentric triangulation
+  CGAL::Point_d<Kernel> points[4];
+  for (unsigned int currentIndex = 0; currentIndex < 4; ++currentIndex) {
+    points[currentIndex] = polygon.vertices[currentIndex];
+  }
+  
+  polygon_triangulated.triangles.push_back(Triangle_d());
+  polygon_triangulated.triangles.back().vertices[0] = points[0];
+  polygon_triangulated.triangles.back().vertices[1] = points[1];
+  polygon_triangulated.triangles.back().vertices[2] = points[2];
+  
+  polygon_triangulated.triangles.push_back(Triangle_d());
+  polygon_triangulated.triangles.back().vertices[0] = points[2];
+  polygon_triangulated.triangles.back().vertices[1] = points[3];
+  polygon_triangulated.triangles.back().vertices[2] = points[0];
   
   return polygon_triangulated;
 }
@@ -353,12 +376,12 @@ void CppLink::makeTesseract() {
   
   std::vector<Mesh_d> tesseract_refined;
   for (auto &polygon : tesseract) {
-    tesseract_refined.push_back(refine(polygon, 0.125, 0.1));
+//    tesseract_refined.push_back(refine(polygon, 0.125, 0.1));
+    tesseract_refined.push_back(triangulateQuad(polygon));
     tesseract_refined.back().colour[0] = 0.0;
     tesseract_refined.back().colour[1] = 0.0;
     tesseract_refined.back().colour[2] = 1.0;
     tesseract_refined.back().colour[3] = 0.2;
-//    tesseract_refined.push_back(triangulate(polygon));
   } currentModelFaces = tesseract_refined;
   currentModelEdges = generate_edges(tesseract, 0.1, 0.01, 4);
   currentModelVertices = generate_vertices(tesseract, 0.2, 2);
