@@ -56,6 +56,10 @@ struct CppLinkWrapper {
   } return cppLinkWrapper->cppLink->currentPointCoordinates; 
 }
 
+- (const float *)currentMeshColour {
+  return cppLinkWrapper->cppLink->currentMesh->colour;
+}
+
 - (void) dealloc {
   delete cppLinkWrapper->cppLink;
   delete cppLinkWrapper;

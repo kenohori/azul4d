@@ -26,6 +26,7 @@ struct CppLinkWrapper;
 - (void) advanceTriangleIterator;
 - (BOOL) triangleIteratorEnded;
 - (const float *)currentTriangleVertex: (long)index;
+- (const float *)currentMeshColour;
 - (void) dealloc;
 
 @end

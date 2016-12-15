@@ -32,9 +32,9 @@ struct VertexOut {
   float4 colour;
 };
 
-vertex VertexOut vertexTransform(device VertexIn *vertices [[buffer(0)]],
-                                 constant Constants &uniforms [[buffer(1)]],
-                                 uint VertexId [[vertex_id]]) {
+vertex VertexOut vertexFacesStereo(device VertexIn *vertices [[buffer(0)]],
+                                   constant Constants &uniforms [[buffer(1)]],
+                                   uint VertexId [[vertex_id]]) {
   
   // Apply 4D transformation
   float4 transformedVertex = uniforms.transformationMatrix * vertices[VertexId].position;

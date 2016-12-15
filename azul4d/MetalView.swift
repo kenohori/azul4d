@@ -55,10 +55,10 @@ class MetalView: MTKView {
     
     // Render pipeline
     let library = device!.newDefaultLibrary()!
-    let vertexFunction = library.makeFunction(name: "vertexTransform")
+    let vertexFacesStereoFunction = library.makeFunction(name: "vertexFacesStereo")
     let fragmentFunction = library.makeFunction(name: "fragmentLit")
     let renderPipelineDescriptor = MTLRenderPipelineDescriptor()
-    renderPipelineDescriptor.vertexFunction = vertexFunction
+    renderPipelineDescriptor.vertexFunction = vertexFacesStereoFunction
     renderPipelineDescriptor.fragmentFunction = fragmentFunction
     renderPipelineDescriptor.colorAttachments[0].pixelFormat = colorPixelFormat
     renderPipelineDescriptor.colorAttachments[0].isBlendingEnabled = true
@@ -96,6 +96,10 @@ class MetalView: MTKView {
     cppLink.initialiseMeshIterator()
     while !cppLink.meshIteratorEnded() {
       cppLink.initialiseTriangleIterator()
+      let firstColourComponent = cppLink.currentMeshColour()
+      let colourBuffer = UnsafeBufferPointer(start: firstColourComponent, count: 4)
+      let colourArray = ContiguousArray(colourBuffer)
+      let colour = [Float](colourArray)
       while !cppLink.triangleIteratorEnded() {
         for pointIndex in 0..<3 {
           let firstPointCoordinate = cppLink.currentTriangleVertex(pointIndex)
@@ -103,18 +107,14 @@ class MetalView: MTKView {
           let pointCoordinatesArray = ContiguousArray(pointCoordinatesBuffer)
           let pointCoordinates = [Float](pointCoordinatesArray)
 //          Swift.print(pointCoordinates)
-          vertices.append(Vertex(position: float4(pointCoordinates[0], pointCoordinates[1], pointCoordinates[2], pointCoordinates[3]), colour: float4(0.0, 0.0, 1.0, 0.5)))
+          vertices.append(Vertex(position: float4(pointCoordinates[0], pointCoordinates[1], pointCoordinates[2], pointCoordinates[3]),
+                                 colour: float4(colour[0], colour[1], colour[2], colour[3])))
         }
         cppLink.advanceTriangleIterator()
       }
       cppLink.advanceMeshIterator()
     }
     
-    // Other side?
-//    var verticesOtherSide: [Vertex] = vertices.reversed()
-//    vertices.append(contentsOf: verticesOtherSide)
-    
-//    Swift.print(vertices.count)
     verticesBuffer = device!.makeBuffer(bytes: vertices, length: MemoryLayout<Vertex>.size*vertices.count, options: [])
   }
   
