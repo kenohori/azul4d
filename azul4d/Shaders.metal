@@ -19,7 +19,7 @@ using namespace metal;
 
 struct Constants {
   float4x4 modelViewProjectionMatrix;
-  float4x4 transformationMatrix;
+//  float4x4 transformationMatrix;
 };
 
 struct VertexIn {
@@ -36,72 +36,72 @@ vertex VertexOut vertexTransform(device VertexIn *vertices [[buffer(0)]],
                                  constant Constants &uniforms [[buffer(1)]],
                                  uint VertexId [[vertex_id]]) {
   
-  // Apply 4D transformation
-  float4 transformedVertex = uniforms.transformationMatrix * vertices[VertexId].position;
-  
-  // Project from R4 to S3
-  float r = sqrt(transformedVertex.x*transformedVertex.x+
-                 transformedVertex.y*transformedVertex.y+
-                 transformedVertex.z*transformedVertex.z+
-                 transformedVertex.w*transformedVertex.w);
-  float3 point_s3;
-  
-  if (r != 0) {
-    point_s3.x = acos(transformedVertex.x/r);
-  } else {
-    if (transformedVertex.x >= 0) {
-      point_s3.x = 0;
-    } else {
-      point_s3.x = 3.141592653589793;
-    }
-  }
-  
-  if (transformedVertex.y*transformedVertex.y+
-      transformedVertex.z*transformedVertex.z+
-      transformedVertex.w*transformedVertex.w != 0) {
-    point_s3.y = acos(transformedVertex.y/sqrt(transformedVertex.y*transformedVertex.y+
-                                                         transformedVertex.z*transformedVertex.z+
-                                                         transformedVertex.w*transformedVertex.w));
-  } else {
-    if (transformedVertex.y >= 0) {
-      point_s3.y = 0;
-    } else {
-      point_s3.y = 3.141592653589793;
-    }
-  }
-  
-  if (transformedVertex.z*transformedVertex.z+
-      transformedVertex.w*transformedVertex.w != 0) {
-    if (transformedVertex.w >= 0) {
-      point_s3.z = acos(transformedVertex.z/sqrt(transformedVertex.z*transformedVertex.z+
-                                                           transformedVertex.w*transformedVertex.w));
-    } else {
-      point_s3.z = -acos(transformedVertex.z/sqrt(transformedVertex.z*transformedVertex.z+
-                                                            transformedVertex.w*transformedVertex.w));
-    }
-  } else {
-    if (transformedVertex.w >= 0) {
-      point_s3.z = 0;
-    } else {
-      point_s3.z = 3.141592653589793;
-    }
-  }
-  
-  // Project from S3 to R4
-  float4 point_r4;
-  point_r4.x = cos(point_s3.x);
-  point_r4.y = sin(point_s3.x)*cos(point_s3.y);
-  point_r4.z = sin(point_s3.x)*sin(point_s3.y)*cos(point_s3.z);
-  point_r4.w = sin(point_s3.x)*sin(point_s3.y)*sin(point_s3.z);
-  
-  // Project from R4 to R3
-  float3 point_r3;
-  point_r3.x = point_r4.x/(point_r4.w-1);
-  point_r3.y = point_r4.y/(point_r4.w-1);
-  point_r3.z = point_r4.z/(point_r4.w-1);
+//  // Apply 4D transformation
+//  float4 transformedVertex = uniforms.transformationMatrix * vertices[VertexId].position;
+//  
+//  // Project from R4 to S3
+//  float r = sqrt(transformedVertex.x*transformedVertex.x+
+//                 transformedVertex.y*transformedVertex.y+
+//                 transformedVertex.z*transformedVertex.z+
+//                 transformedVertex.w*transformedVertex.w);
+//  float3 point_s3;
+//  
+//  if (r != 0) {
+//    point_s3.x = acos(transformedVertex.x/r);
+//  } else {
+//    if (transformedVertex.x >= 0) {
+//      point_s3.x = 0;
+//    } else {
+//      point_s3.x = 3.141592653589793;
+//    }
+//  }
+//  
+//  if (transformedVertex.y*transformedVertex.y+
+//      transformedVertex.z*transformedVertex.z+
+//      transformedVertex.w*transformedVertex.w != 0) {
+//    point_s3.y = acos(transformedVertex.y/sqrt(transformedVertex.y*transformedVertex.y+
+//                                                         transformedVertex.z*transformedVertex.z+
+//                                                         transformedVertex.w*transformedVertex.w));
+//  } else {
+//    if (transformedVertex.y >= 0) {
+//      point_s3.y = 0;
+//    } else {
+//      point_s3.y = 3.141592653589793;
+//    }
+//  }
+//  
+//  if (transformedVertex.z*transformedVertex.z+
+//      transformedVertex.w*transformedVertex.w != 0) {
+//    if (transformedVertex.w >= 0) {
+//      point_s3.z = acos(transformedVertex.z/sqrt(transformedVertex.z*transformedVertex.z+
+//                                                           transformedVertex.w*transformedVertex.w));
+//    } else {
+//      point_s3.z = -acos(transformedVertex.z/sqrt(transformedVertex.z*transformedVertex.z+
+//                                                            transformedVertex.w*transformedVertex.w));
+//    }
+//  } else {
+//    if (transformedVertex.w >= 0) {
+//      point_s3.z = 0;
+//    } else {
+//      point_s3.z = 3.141592653589793;
+//    }
+//  }
+//  
+//  // Project from S3 to R4
+//  float4 point_r4;
+//  point_r4.x = cos(point_s3.x);
+//  point_r4.y = sin(point_s3.x)*cos(point_s3.y);
+//  point_r4.z = sin(point_s3.x)*sin(point_s3.y)*cos(point_s3.z);
+//  point_r4.w = sin(point_s3.x)*sin(point_s3.y)*sin(point_s3.z);
+//  
+//  // Project from R4 to R3
+//  float3 point_r3;
+//  point_r3.x = point_r4.x/(point_r4.w-1);
+//  point_r3.y = point_r4.y/(point_r4.w-1);
+//  point_r3.z = point_r4.z/(point_r4.w-1);
   
   VertexOut out;
-  out.position = uniforms.modelViewProjectionMatrix * float4(point_r3, 1.0);
+  out.position = uniforms.modelViewProjectionMatrix * vertices[VertexId].position;
   out.colour = vertices[VertexId].colour;
   return out;
 }

@@ -11,7 +11,6 @@ import MetalKit
 
 struct Constants {
   var modelViewProjectionMatrix = matrix_identity_float4x4
-  var transformationMatrix = matrix_identity_float4x4
 }
 
 struct Vertex {
@@ -31,11 +30,16 @@ class MetalView: MTKView {
   
   var modifierKey: Bool = false
   
+  var transformationMatrix = matrix_identity_float4x4
+  
   var modelMatrix = matrix_identity_float4x4
   var viewMatrix = matrix_identity_float4x4
   var projectionMatrix = matrix_identity_float4x4
   
   var constants = Constants()
+  
+  var vertices4D = [Vertex]()
+  var vertices3D = [Vertex]()
   var verticesBuffer: MTLBuffer?
   
   required init(coder: NSCoder) {
@@ -90,12 +94,15 @@ class MetalView: MTKView {
     constants.modelViewProjectionMatrix = matrix_multiply(projectionMatrix, matrix_multiply(viewMatrix, modelMatrix))
     
     // Data
-    var vertices = [Vertex]()
     let cppLink = CppLinkWrapperWrapper()!
     cppLink.makeTesseract()
     cppLink.initialiseMeshIterator()
     while !cppLink.meshIteratorEnded() {
       cppLink.initialiseTriangleIterator()
+      let firstColourComponent = cppLink.currentMeshColour()
+      let colourBuffer = UnsafeBufferPointer(start: firstColourComponent, count: 4)
+      let colourArray = ContiguousArray(colourBuffer)
+      let colour = [Float](colourArray)
       while !cppLink.triangleIteratorEnded() {
         for pointIndex in 0..<3 {
           let firstPointCoordinate = cppLink.currentTriangleVertex(pointIndex)
@@ -103,23 +110,84 @@ class MetalView: MTKView {
           let pointCoordinatesArray = ContiguousArray(pointCoordinatesBuffer)
           let pointCoordinates = [Float](pointCoordinatesArray)
 //          Swift.print(pointCoordinates)
-          vertices.append(Vertex(position: float4(pointCoordinates[0], pointCoordinates[1], pointCoordinates[2], pointCoordinates[3]), colour: float4(0.0, 0.0, 1.0, 0.5)))
+          vertices4D.append(Vertex(position: float4(pointCoordinates[0], pointCoordinates[1], pointCoordinates[2], pointCoordinates[3]),
+                                   colour: float4(colour[0], colour[1], colour[2], colour[3])))
         }
         cppLink.advanceTriangleIterator()
       }
       cppLink.advanceMeshIterator()
     }
-    
-    // Other side?
-//    var verticesOtherSide: [Vertex] = vertices.reversed()
-//    vertices.append(contentsOf: verticesOtherSide)
-    
-//    Swift.print(vertices.count)
-    verticesBuffer = device!.makeBuffer(bytes: vertices, length: MemoryLayout<Vertex>.size*vertices.count, options: [])
+    transformVertices()
   }
   
   override var acceptsFirstResponder: Bool {
     return true
+  }
+  
+  func transformVertices() {
+    
+    vertices3D.removeAll()
+    for vertex in vertices4D {
+      
+      // Apply 4D transformation
+      let transformedVertex: float4 = matrix_multiply(transformationMatrix, vertex.position)
+      
+      // Project from R4 to S3
+      let r: Float = sqrt(transformedVertex.x*transformedVertex.x+transformedVertex.y*transformedVertex.y+transformedVertex.z*transformedVertex.z+transformedVertex.w*transformedVertex.w)
+      var point_s3: float3 = float3(0.0, 0.0, 0.0)
+      
+      if r != 0.0 {
+        point_s3.x = acos(transformedVertex.x/r)
+      } else {
+        if transformedVertex.x >= 0.0 {
+          point_s3.x = 0.0
+        } else {
+          point_s3.x = 3.141592653589793
+        }
+      }
+      
+      if transformedVertex.y*transformedVertex.y+transformedVertex.z*transformedVertex.z+transformedVertex.w*transformedVertex.w != 0 {
+        point_s3.y = acos(transformedVertex.y/sqrt(transformedVertex.y*transformedVertex.y+transformedVertex.z*transformedVertex.z+transformedVertex.w*transformedVertex.w))
+      } else {
+        if transformedVertex.y >= 0.0 {
+          point_s3.y = 0.0
+        } else {
+          point_s3.y = 3.141592653589793
+        }
+      }
+      
+      if transformedVertex.z*transformedVertex.z+transformedVertex.w*transformedVertex.w != 0 {
+        if transformedVertex.w >= 0.0 {
+          point_s3.z = acos(transformedVertex.z/sqrt(transformedVertex.z*transformedVertex.z+transformedVertex.w*transformedVertex.w))
+        } else {
+          point_s3.z = -acos(transformedVertex.z/sqrt(transformedVertex.z*transformedVertex.z+transformedVertex.w*transformedVertex.w))
+        }
+      } else {
+        if transformedVertex.w >= 0.0 {
+          point_s3.z = 0.0
+        } else {
+          point_s3.z = 3.141592653589793
+        }
+      }
+      
+      // Project from S3 to R4
+      var point_r4: float4 = float4(0.0, 0.0, 0.0, 0.0)
+      point_r4.x = cos(point_s3.x)
+      point_r4.y = sin(point_s3.x)*cos(point_s3.y)
+      point_r4.z = sin(point_s3.x)*sin(point_s3.y)*cos(point_s3.z)
+      point_r4.w = sin(point_s3.x)*sin(point_s3.y)*sin(point_s3.z)
+      
+      // Project from R4 to R3
+      var point_r3: float3 = float3(0.0, 0.0, 0.0)
+      point_r3.x = point_r4.x/(point_r4.w-1)
+      point_r3.y = point_r4.y/(point_r4.w-1)
+      point_r3.z = point_r4.z/(point_r4.w-1)
+      
+      vertices3D.append(Vertex(position: float4(point_r3.x, point_r3.y, point_r3.z, 1.0), colour: vertex.colour))
+    }
+    
+    // Load into buffer
+    verticesBuffer = device!.makeBuffer(bytes: vertices3D, length: MemoryLayout<Vertex>.size*vertices3D.count, options: [])
   }
   
   override func draw(_ dirtyRect: NSRect) {
@@ -192,8 +260,8 @@ class MetalView: MTKView {
                                            vector4(0.0, 1.0, 0.0, 0.0),
                                            vector4(0.0, 0.0, cos(angleY), -sin(angleY)),
                                            vector4(0.0, 0.0, sin(angleY), cos(angleY)))
-      constants.transformationMatrix = matrix_multiply(rotationXY, constants.transformationMatrix)
-      constants.transformationMatrix = matrix_multiply(rotationZW, constants.transformationMatrix)
+      transformationMatrix = matrix_multiply(rotationXY, transformationMatrix)
+      transformationMatrix = matrix_multiply(rotationZW, transformationMatrix)
     } else {
       let angleX = currentX-lastX
       let rotationYZ = matrix_from_columns(vector4(1.0, 0.0, 0.0, 0.0),
@@ -205,9 +273,10 @@ class MetalView: MTKView {
                                            vector4(0.0, 1.0, 0.0, 0.0),
                                            vector4(0.0, 0.0, 1.0, 0.0),
                                            vector4(-sin(angleY), 0.0, 0.0, cos(angleY)))
-      constants.transformationMatrix = matrix_multiply(rotationYZ, constants.transformationMatrix)
-      constants.transformationMatrix = matrix_multiply(rotationWX, constants.transformationMatrix)
+      transformationMatrix = matrix_multiply(rotationYZ, transformationMatrix)
+      transformationMatrix = matrix_multiply(rotationWX, transformationMatrix)
     }
+    transformVertices()
   }
   
   override func flagsChanged(with event: NSEvent) {
