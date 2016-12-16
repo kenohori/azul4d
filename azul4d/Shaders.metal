@@ -130,6 +130,9 @@ float4 crossProduct4(float4 u, float4 v, float4 w) {
 vertex VertexOut vertexFacesOrtho(device VertexIn *vertices [[buffer(0)]],
                                   constant Constants &uniforms [[buffer(1)]],
                                   uint VertexId [[vertex_id]]) {
+  
+  float4 transformedVertex = uniforms.transformationMatrix * vertices[VertexId].position;
+  
   float4 from = float4(0.0, 1.0, 0.0, 0.0);
   float4 to = float4(0.0, 0.0, 0.0, 0.0);
   float4 up = float4(0.0, 0.0, 1.0, 0.0);
@@ -138,7 +141,15 @@ vertex VertexOut vertexFacesOrtho(device VertexIn *vertices [[buffer(0)]],
   float4 d = normalise4(float4(to.x-from.x, to.y-from.y, to.z-from.z, to.w-from.w));
   float4 a = normalise4(crossProduct4(up, over, d));
   float4 b = normalise4(crossProduct4(over, d, a));
-  float4 c = normalise4(crossProduct4(d, a, b));
+  float4 c = crossProduct4(d, a, b);
+  
+  float4x4 m(a, b, c, d);
+  float4 eye = (transformedVertex-from) * m;
+  
+  VertexOut out;
+  out.position = uniforms.modelViewProjectionMatrix * float4(eye.x, eye.y, eye.z, 1.0);
+  out.colour = vertices[VertexId].colour;
+  return out;
 }
 
 fragment half4 fragmentLit(VertexOut fragmentIn [[stage_in]]) {

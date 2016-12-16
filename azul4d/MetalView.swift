@@ -63,7 +63,8 @@ class MetalView: MTKView {
     
     // Render pipeline
     let library = device!.newDefaultLibrary()!
-    let vertexFacesStereoFunction = library.makeFunction(name: "vertexFacesStereo")
+//    let vertexFacesStereoFunction = library.makeFunction(name: "vertexFacesStereo")
+    let vertexFacesStereoFunction = library.makeFunction(name: "vertexFacesOrtho")
     let fragmentFunction = library.makeFunction(name: "fragmentLit")
     let renderPipelineDescriptor = MTLRenderPipelineDescriptor()
     renderPipelineDescriptor.vertexFunction = vertexFacesStereoFunction
