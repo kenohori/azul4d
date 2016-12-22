@@ -17,8 +17,11 @@
 import Metal
 import MetalKit
 
-struct Constants {
+struct RenderingConstants {
   var modelViewProjectionMatrix = matrix_identity_float4x4
+}
+
+struct ProjectionParameters {
   var transformationMatrix = matrix_identity_float4x4
 }
 
@@ -30,6 +33,7 @@ struct Vertex {
 class MetalView: MTKView {
   
   var commandQueue: MTLCommandQueue?
+  var computePipelineState: MTLComputePipelineState?
   var renderPipelineState: MTLRenderPipelineState?
   var depthStencilState: MTLDepthStencilState?
   
@@ -43,8 +47,11 @@ class MetalView: MTKView {
   var viewMatrix = matrix_identity_float4x4
   var projectionMatrix = matrix_identity_float4x4
   
-  var constants = Constants()
-  var verticesBuffer: MTLBuffer?
+  var renderingConstants = RenderingConstants()
+  var projectionParameters = ProjectionParameters()
+  var vertices = [Vertex]()
+  var vertices4DBuffer: MTLBuffer?
+  var vertices3DBuffer: MTLBuffer?
   
   required init(coder: NSCoder) {
     
@@ -61,13 +68,22 @@ class MetalView: MTKView {
     // Command queue
     commandQueue = device!.makeCommandQueue()
     
-    // Render pipeline
+    // Library
     let library = device!.newDefaultLibrary()!
-    let vertexFacesStereoFunction = library.makeFunction(name: "vertexFacesStereo")
-//    let vertexFacesStereoFunction = library.makeFunction(name: "vertexFacesOrtho")
+    
+    // Compute pipeline
+    let stereographicProjectionFunction = library.makeFunction(name: "stereographicProjection")
+    do {
+      computePipelineState = try device!.makeComputePipelineState(function: stereographicProjectionFunction!)
+    } catch {
+      Swift.print("Unable to create compute pipeline state")
+    }
+    
+    // Render pipeline
+    let vertexFunction = library.makeFunction(name: "vertexLit")
     let fragmentFunction = library.makeFunction(name: "fragmentLit")
     let renderPipelineDescriptor = MTLRenderPipelineDescriptor()
-    renderPipelineDescriptor.vertexFunction = vertexFacesStereoFunction
+    renderPipelineDescriptor.vertexFunction = vertexFunction
     renderPipelineDescriptor.fragmentFunction = fragmentFunction
     renderPipelineDescriptor.colorAttachments[0].pixelFormat = colorPixelFormat
     renderPipelineDescriptor.colorAttachments[0].isBlendingEnabled = true
@@ -96,10 +112,9 @@ class MetalView: MTKView {
     viewMatrix = matrix4x4_look_at(eye: eye, centre: centre, up: float3(0.0, 1.0, 0.0))
     projectionMatrix = matrix4x4_perspective(fieldOfView: fieldOfView, aspectRatio: Float(bounds.size.width / bounds.size.height), nearZ: 0.01, farZ: 10.0)
     
-    constants.modelViewProjectionMatrix = matrix_multiply(projectionMatrix, matrix_multiply(viewMatrix, modelMatrix))
+    renderingConstants.modelViewProjectionMatrix = matrix_multiply(projectionMatrix, matrix_multiply(viewMatrix, modelMatrix))
     
     // Data
-    var vertices = [Vertex]()
     let cppLink = CppLinkWrapperWrapper()!
 //    cppLink.makeTesseract()
     cppLink.makeHouse()
@@ -125,8 +140,22 @@ class MetalView: MTKView {
       }
       cppLink.advanceMeshIterator()
     }
+    Swift.print("\(vertices.count) vertices")
+    vertices4DBuffer = device!.makeBuffer(bytes: vertices, length: MemoryLayout<Vertex>.size*vertices.count, options: [])
+    vertices3DBuffer = device!.makeBuffer(length: MemoryLayout<Vertex>.size*vertices.count, options: [])
     
-    verticesBuffer = device!.makeBuffer(bytes: vertices, length: MemoryLayout<Vertex>.size*vertices.count, options: [])
+    // Project
+    let commandBuffer = commandQueue!.makeCommandBuffer()
+    let computeCommandEncoder = commandBuffer.makeComputeCommandEncoder()
+    computeCommandEncoder.setComputePipelineState(computePipelineState!)
+    computeCommandEncoder.setBuffer(vertices4DBuffer, offset: 0, at: 0)
+    computeCommandEncoder.setBuffer(vertices3DBuffer, offset: 0, at: 1)
+    computeCommandEncoder.setBytes(&projectionParameters, length: MemoryLayout<ProjectionParameters>.size, at: 2)
+    let threadsPerGroup = MTLSize(width: 256, height: 1, depth: 1)
+    let numThreadGroups = MTLSize(width: vertices.count/threadsPerGroup.width, height: 1, depth: 1)
+    computeCommandEncoder.dispatchThreadgroups(numThreadGroups, threadsPerThreadgroup: threadsPerGroup)
+    computeCommandEncoder.endEncoding()
+    commandBuffer.commit()
   }
   
   override var acceptsFirstResponder: Bool {
@@ -147,9 +176,9 @@ class MetalView: MTKView {
 //    let colour = sin(CACurrentMediaTime())
 //    clearColor = MTLClearColorMake(colour, colour, colour, 1.0)
     
-    renderEncoder.setVertexBuffer(verticesBuffer, offset: 0, at: 0)
-    renderEncoder.setVertexBytes(&constants, length: MemoryLayout<Constants>.size, at: 1)
-    renderEncoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: verticesBuffer!.length/MemoryLayout<Vertex>.size)
+    renderEncoder.setVertexBuffer(vertices3DBuffer, offset: 0, at: 0)
+    renderEncoder.setVertexBytes(&renderingConstants, length: MemoryLayout<RenderingConstants>.size, at: 1)
+    renderEncoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertices3DBuffer!.length/MemoryLayout<Vertex>.size)
     
     renderEncoder.endEncoding()
     let drawable = currentDrawable!
@@ -160,7 +189,7 @@ class MetalView: MTKView {
   override func setFrameSize(_ newSize: NSSize) {
     super.setFrameSize(newSize)
     projectionMatrix = matrix4x4_perspective(fieldOfView: fieldOfView, aspectRatio: Float(bounds.size.width / bounds.size.height), nearZ: 0.001, farZ: 100.0)
-    constants.modelViewProjectionMatrix = matrix_multiply(projectionMatrix, matrix_multiply(viewMatrix, modelMatrix))
+    renderingConstants.modelViewProjectionMatrix = matrix_multiply(projectionMatrix, matrix_multiply(viewMatrix, modelMatrix))
     needsDisplay = true
   }
   
@@ -176,7 +205,7 @@ class MetalView: MTKView {
     modelMatrix = matrix_multiply(modelMatrix, matrix4x4_translation(shift: motionInObjectCoordinates))
     
     // Put model matrix in arrays and render
-    constants.modelViewProjectionMatrix = matrix_multiply(projectionMatrix, matrix_multiply(viewMatrix, modelMatrix))
+    renderingConstants.modelViewProjectionMatrix = matrix_multiply(projectionMatrix, matrix_multiply(viewMatrix, modelMatrix))
   }
   
   override func mouseDragged(with event: NSEvent) {
@@ -203,8 +232,8 @@ class MetalView: MTKView {
                                            vector4(0.0, 1.0, 0.0, 0.0),
                                            vector4(0.0, 0.0, cos(angleY), -sin(angleY)),
                                            vector4(0.0, 0.0, sin(angleY), cos(angleY)))
-      constants.transformationMatrix = matrix_multiply(rotationXY, constants.transformationMatrix)
-      constants.transformationMatrix = matrix_multiply(rotationZW, constants.transformationMatrix)
+      projectionParameters.transformationMatrix = matrix_multiply(rotationXY, projectionParameters.transformationMatrix)
+      projectionParameters.transformationMatrix = matrix_multiply(rotationZW, projectionParameters.transformationMatrix)
     } else {
       let angleX = currentX-lastX
       let rotationYZ = matrix_from_columns(vector4(1.0, 0.0, 0.0, 0.0),
@@ -216,9 +245,22 @@ class MetalView: MTKView {
                                            vector4(0.0, 1.0, 0.0, 0.0),
                                            vector4(0.0, 0.0, 1.0, 0.0),
                                            vector4(-sin(angleY), 0.0, 0.0, cos(angleY)))
-      constants.transformationMatrix = matrix_multiply(rotationYZ, constants.transformationMatrix)
-      constants.transformationMatrix = matrix_multiply(rotationWX, constants.transformationMatrix)
+      projectionParameters.transformationMatrix = matrix_multiply(rotationYZ, projectionParameters.transformationMatrix)
+      projectionParameters.transformationMatrix = matrix_multiply(rotationWX, projectionParameters.transformationMatrix)
     }
+
+    // Project
+    let commandBuffer = commandQueue!.makeCommandBuffer()
+    let computeCommandEncoder = commandBuffer.makeComputeCommandEncoder()
+    computeCommandEncoder.setComputePipelineState(computePipelineState!)
+    computeCommandEncoder.setBuffer(vertices4DBuffer, offset: 0, at: 0)
+    computeCommandEncoder.setBuffer(vertices3DBuffer, offset: 0, at: 1)
+    computeCommandEncoder.setBytes(&projectionParameters, length: MemoryLayout<ProjectionParameters>.size, at: 2)
+    let threadsPerGroup = MTLSize(width: 256, height: 1, depth: 1)
+    let numThreadGroups = MTLSize(width: vertices.count/threadsPerGroup.width, height: 1, depth: 1)
+    computeCommandEncoder.dispatchThreadgroups(numThreadGroups, threadsPerThreadgroup: threadsPerGroup)
+    computeCommandEncoder.endEncoding()
+    commandBuffer.commit()
   }
   
   override func flagsChanged(with event: NSEvent) {
