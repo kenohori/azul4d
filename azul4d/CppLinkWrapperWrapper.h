@@ -45,6 +45,7 @@ struct CppLinkWrapper;
 - (void) initialiseVerticesIterator;
 - (void) advanceVerticesIterator;
 - (BOOL) verticesIteratorEnded;
+- (const float *)currentVertex;
 
 - (void) dealloc;
 

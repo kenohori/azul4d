@@ -72,6 +72,36 @@ struct CppLinkWrapper {
   } return cppLinkWrapper->cppLink->currentPointCoordinates; 
 }
 
+- (void) initialiseEdgesIterator {
+  cppLinkWrapper->cppLink->currentEdge = cppLinkWrapper->cppLink->edges.begin();
+}
+
+- (void) advanceEdgesIterator {
+  ++cppLinkWrapper->cppLink->currentEdge;
+}
+
+- (BOOL) edgesIteratorEnded {
+  return cppLinkWrapper->cppLink->currentEdge == cppLinkWrapper->cppLink->edges.end();
+}
+
+- (void) initialiseVerticesIterator {
+  cppLinkWrapper->cppLink->currentVertex = cppLinkWrapper->cppLink->vertices.begin();
+}
+
+- (void) advanceVerticesIterator {
+  ++cppLinkWrapper->cppLink->currentVertex;
+}
+
+- (BOOL) verticesIteratorEnded {
+  return cppLinkWrapper->cppLink->currentVertex == cppLinkWrapper->cppLink->vertices.end();
+}
+
+- (const float *)currentVertex {
+  for (unsigned int i = 0; i < 4; ++i) {
+    cppLinkWrapper->cppLink->currentPointCoordinates[i] = cppLinkWrapper->cppLink->currentVertex->cartesian(i);
+  } return cppLinkWrapper->cppLink->currentPointCoordinates;
+}
+
 - (void) dealloc {
   delete cppLinkWrapper->cppLink;
   delete cppLinkWrapper;

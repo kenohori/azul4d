@@ -49,9 +49,14 @@ class MetalView: MTKView {
   
   var renderingConstants = RenderingConstants()
   var projectionParameters = ProjectionParameters()
+  var faces = [Vertex]()
+  var edges = [Vertex]()
   var vertices = [Vertex]()
+  var faces4DBuffer: MTLBuffer?
+  var faces3DBuffer: MTLBuffer?
   var vertices4DBuffer: MTLBuffer?
   var vertices3DBuffer: MTLBuffer?
+  var verticesFacesBuffer: MTLBuffer?
   
   required init(coder: NSCoder) {
     
@@ -118,6 +123,7 @@ class MetalView: MTKView {
     let cppLink = CppLinkWrapperWrapper()!
 //    cppLink.makeTesseract()
     cppLink.makeHouse()
+    
     cppLink.initialiseFacesIterator()
     while !cppLink.facesIteratorEnded() {
       cppLink.initialiseFaceTrianglesIterator()
@@ -132,29 +138,172 @@ class MetalView: MTKView {
           let pointCoordinatesArray = ContiguousArray(pointCoordinatesBuffer)
           let pointCoordinates = [Float](pointCoordinatesArray)
 //          Swift.print(pointCoordinates)
-          vertices.append(Vertex(position: float4(pointCoordinates[0], pointCoordinates[1], pointCoordinates[2], pointCoordinates[3]),
-                                 colour: float4(colour[0], colour[1], colour[2], colour[3])))
+          faces.append(Vertex(position: float4(pointCoordinates[0], pointCoordinates[1], pointCoordinates[2], pointCoordinates[3]),
+                              colour: float4(colour[0], colour[1], colour[2], colour[3])))
         }
         cppLink.advanceFaceTrianglesIterator()
       }
       cppLink.advanceFacesIterator()
     }
-    Swift.print("\(vertices.count) vertices")
+    Swift.print("\(faces.count) face vertices")
+    faces4DBuffer = device!.makeBuffer(bytes: faces, length: MemoryLayout<Vertex>.size*faces.count, options: [])
+    faces3DBuffer = device!.makeBuffer(length: MemoryLayout<Vertex>.size*faces.count, options: [])
+    
+    cppLink.initialiseVerticesIterator()
+    while !cppLink.verticesIteratorEnded() {
+      let firstPointCoordinate = cppLink.currentVertex()
+      let pointCoordinatesBuffer = UnsafeBufferPointer(start: firstPointCoordinate, count: 4)
+      let pointCoordinatesArray = ContiguousArray(pointCoordinatesBuffer)
+      let pointCoordinates = [Float](pointCoordinatesArray)
+      vertices.append(Vertex(position: float4(pointCoordinates[0], pointCoordinates[1], pointCoordinates[2], pointCoordinates[3]),
+                             colour: float4(0.0, 0.0, 0.0, 1.0)))
+      cppLink.advanceVerticesIterator()
+    }
     vertices4DBuffer = device!.makeBuffer(bytes: vertices, length: MemoryLayout<Vertex>.size*vertices.count, options: [])
     vertices3DBuffer = device!.makeBuffer(length: MemoryLayout<Vertex>.size*vertices.count, options: [])
     
-    // Project
-    let commandBuffer = commandQueue!.makeCommandBuffer()
-    let computeCommandEncoder = commandBuffer.makeComputeCommandEncoder()
-    computeCommandEncoder.setComputePipelineState(computePipelineState!)
-    computeCommandEncoder.setBuffer(vertices4DBuffer, offset: 0, at: 0)
-    computeCommandEncoder.setBuffer(vertices3DBuffer, offset: 0, at: 1)
-    computeCommandEncoder.setBytes(&projectionParameters, length: MemoryLayout<ProjectionParameters>.size, at: 2)
-    let threadsPerGroup = MTLSize(width: 256, height: 1, depth: 1)
-    let numThreadGroups = MTLSize(width: vertices.count/threadsPerGroup.width, height: 1, depth: 1)
-    computeCommandEncoder.dispatchThreadgroups(numThreadGroups, threadsPerThreadgroup: threadsPerGroup)
-    computeCommandEncoder.endEncoding()
-    commandBuffer.commit()
+    
+    // Project faces
+    let facesCommandBuffer = commandQueue!.makeCommandBuffer()
+    let facesComputeCommandEncoder = facesCommandBuffer.makeComputeCommandEncoder()
+    facesComputeCommandEncoder.setComputePipelineState(computePipelineState!)
+    facesComputeCommandEncoder.setBuffer(faces4DBuffer, offset: 0, at: 0)
+    facesComputeCommandEncoder.setBuffer(faces3DBuffer, offset: 0, at: 1)
+    facesComputeCommandEncoder.setBytes(&projectionParameters, length: MemoryLayout<ProjectionParameters>.size, at: 2)
+    let facesThreadsPerGroup = MTLSize(width: 256, height: 1, depth: 1)
+    let facesNumThreadGroups = MTLSize(width: faces.count/facesThreadsPerGroup.width, height: 1, depth: 1)
+    facesComputeCommandEncoder.dispatchThreadgroups(facesNumThreadGroups, threadsPerThreadgroup: facesThreadsPerGroup)
+    facesComputeCommandEncoder.endEncoding()
+    facesCommandBuffer.commit()
+    
+    // Project vertices
+    let verticesCommandBuffer = commandQueue!.makeCommandBuffer()
+    let verticesComputeCommandEncoder = verticesCommandBuffer.makeComputeCommandEncoder()
+    verticesComputeCommandEncoder.setComputePipelineState(computePipelineState!)
+    verticesComputeCommandEncoder.setBuffer(vertices4DBuffer, offset: 0, at: 0)
+    verticesComputeCommandEncoder.setBuffer(vertices3DBuffer, offset: 0, at: 1)
+    verticesComputeCommandEncoder.setBytes(&projectionParameters, length: MemoryLayout<ProjectionParameters>.size, at: 2)
+    let verticesThreadsPerGroup = MTLSize(width: 16, height: 1, depth: 1)
+    let verticesNumThreadGroups = MTLSize(width: vertices.count/verticesThreadsPerGroup.width, height: 1, depth: 1)
+    verticesComputeCommandEncoder.dispatchThreadgroups(verticesNumThreadGroups, threadsPerThreadgroup: verticesThreadsPerGroup)
+    verticesComputeCommandEncoder.endEncoding()
+    verticesCommandBuffer.commit()
+    
+  }
+  
+  func generateVertices() {
+    let vertexData = NSData(bytesNoCopy: vertices3DBuffer!.contents(), length: MemoryLayout<Vertex>.size*vertices.count, freeWhenDone: false)
+    var projectedVertices = [Vertex](vertices)
+    vertexData.getBytes(&projectedVertices, length: MemoryLayout<Vertex>.size*vertices.count)
+    let goldenRatio: Float = (1.0+sqrt(5.0))/2.0;
+    let radius = 0.1
+    let normalisingFactor: Float = sqrt(goldenRatio*goldenRatio+1.0)/radius;
+    
+    var icosahedronVertices = [float4]()
+    icosahedronVertices.append(float4(-1.0/normalisingFactor,  goldenRatio/normalisingFactor, 0.0, 0.0))
+    icosahedronVertices.append(float4( 1.0/normalisingFactor,  goldenRatio/normalisingFactor, 0.0, 0.0))
+    icosahedronVertices.append(float4(-1.0/normalisingFactor, -goldenRatio/normalisingFactor, 0.0, 0.0))
+    icosahedronVertices.append(float4( 1.0/normalisingFactor, -goldenRatio/normalisingFactor, 0.0, 0.0))
+    icosahedronVertices.append(float4(0.0, -1.0/normalisingFactor,  goldenRatio/normalisingFactor, 0.0))
+    icosahedronVertices.append(float4(0.0,  1.0/normalisingFactor,  goldenRatio/normalisingFactor, 0.0))
+    icosahedronVertices.append(float4(0.0, -1.0/normalisingFactor, -goldenRatio/normalisingFactor, 0.0))
+    icosahedronVertices.append(float4(0.0,  1.0/normalisingFactor, -goldenRatio/normalisingFactor, 0.0))
+    icosahedronVertices.append(float4( goldenRatio/normalisingFactor, 0.0, -1.0/normalisingFactor, 0.0))
+    icosahedronVertices.append(float4( goldenRatio/normalisingFactor, 0.0,  1.0/normalisingFactor, 0.0))
+    icosahedronVertices.append(float4(-goldenRatio/normalisingFactor, 0.0, -1.0/normalisingFactor, 0.0))
+    icosahedronVertices.append(float4(-goldenRatio/normalisingFactor, 0.0,  1.0/normalisingFactor, 0.0))
+    
+    var verticesVertices = [Vertex]()
+    for vertex in projectedVertices {
+//      Swift.print(vertex)
+      var vertexVertices = [Vertex]()
+      
+//      Swift.print("Vertex: \(vertex.position)")
+//      Swift.print("Ico: \(vertex.position+icosahedronVertices[0])")
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[0], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[11], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[5], colour: vertex.colour))
+      
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[0], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[5], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[1], colour: vertex.colour))
+      
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[0], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[1], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[7], colour: vertex.colour))
+      
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[0], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[7], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[10], colour: vertex.colour))
+      
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[0], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[10], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[11], colour: vertex.colour))
+      
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[1], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[5], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[9], colour: vertex.colour))
+      
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[5], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[11], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[4], colour: vertex.colour))
+      
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[11], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[10], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[2], colour: vertex.colour))
+      
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[10], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[7], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[6], colour: vertex.colour))
+      
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[7], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[1], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[8], colour: vertex.colour))
+      
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[3], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[9], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[4], colour: vertex.colour))
+      
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[3], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[4], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[2], colour: vertex.colour))
+      
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[3], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[2], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[6], colour: vertex.colour))
+      
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[3], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[6], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[8], colour: vertex.colour))
+      
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[3], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[8], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[9], colour: vertex.colour))
+      
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[4], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[9], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[5], colour: vertex.colour))
+      
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[2], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[4], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[11], colour: vertex.colour))
+      
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[6], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[2], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[10], colour: vertex.colour))
+      
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[8], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[6], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[7], colour: vertex.colour))
+      
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[9], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[8], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[1], colour: vertex.colour))
+      
+      verticesVertices.append(contentsOf: vertexVertices)
+    }
+    
+    verticesFacesBuffer = device!.makeBuffer(bytes: verticesVertices, length: MemoryLayout<Vertex>.size*verticesVertices.count, options: [])
   }
   
   override var acceptsFirstResponder: Bool {
@@ -175,14 +324,22 @@ class MetalView: MTKView {
 //    let colour = sin(CACurrentMediaTime())
 //    clearColor = MTLClearColorMake(colour, colour, colour, 1.0)
     
-    renderEncoder.setVertexBuffer(vertices3DBuffer, offset: 0, at: 0)
+    if verticesFacesBuffer != nil {
+      renderEncoder.setVertexBuffer(verticesFacesBuffer, offset: 0, at: 0)
+      renderEncoder.setVertexBytes(&renderingConstants, length: MemoryLayout<RenderingConstants>.size, at: 1)
+      renderEncoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: verticesFacesBuffer!.length/MemoryLayout<Vertex>.size)
+    }
+    
+    renderEncoder.setVertexBuffer(faces3DBuffer, offset: 0, at: 0)
     renderEncoder.setVertexBytes(&renderingConstants, length: MemoryLayout<RenderingConstants>.size, at: 1)
-    renderEncoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertices3DBuffer!.length/MemoryLayout<Vertex>.size)
+    renderEncoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: faces3DBuffer!.length/MemoryLayout<Vertex>.size)
     
     renderEncoder.endEncoding()
     let drawable = currentDrawable!
     commandBuffer.present(drawable)
     commandBuffer.commit()
+    
+    generateVertices()
   }
   
   override func setFrameSize(_ newSize: NSSize) {
@@ -248,18 +405,31 @@ class MetalView: MTKView {
       projectionParameters.transformationMatrix = matrix_multiply(rotationWX, projectionParameters.transformationMatrix)
     }
 
-    // Project
-    let commandBuffer = commandQueue!.makeCommandBuffer()
-    let computeCommandEncoder = commandBuffer.makeComputeCommandEncoder()
-    computeCommandEncoder.setComputePipelineState(computePipelineState!)
-    computeCommandEncoder.setBuffer(vertices4DBuffer, offset: 0, at: 0)
-    computeCommandEncoder.setBuffer(vertices3DBuffer, offset: 0, at: 1)
-    computeCommandEncoder.setBytes(&projectionParameters, length: MemoryLayout<ProjectionParameters>.size, at: 2)
-    let threadsPerGroup = MTLSize(width: 256, height: 1, depth: 1)
-    let numThreadGroups = MTLSize(width: vertices.count/threadsPerGroup.width, height: 1, depth: 1)
-    computeCommandEncoder.dispatchThreadgroups(numThreadGroups, threadsPerThreadgroup: threadsPerGroup)
-    computeCommandEncoder.endEncoding()
-    commandBuffer.commit()
+    // Project faces
+    let facesCommandBuffer = commandQueue!.makeCommandBuffer()
+    let facesComputeCommandEncoder = facesCommandBuffer.makeComputeCommandEncoder()
+    facesComputeCommandEncoder.setComputePipelineState(computePipelineState!)
+    facesComputeCommandEncoder.setBuffer(faces4DBuffer, offset: 0, at: 0)
+    facesComputeCommandEncoder.setBuffer(faces3DBuffer, offset: 0, at: 1)
+    facesComputeCommandEncoder.setBytes(&projectionParameters, length: MemoryLayout<ProjectionParameters>.size, at: 2)
+    let facesThreadsPerGroup = MTLSize(width: 256, height: 1, depth: 1)
+    let facesNumThreadGroups = MTLSize(width: faces.count/facesThreadsPerGroup.width, height: 1, depth: 1)
+    facesComputeCommandEncoder.dispatchThreadgroups(facesNumThreadGroups, threadsPerThreadgroup: facesThreadsPerGroup)
+    facesComputeCommandEncoder.endEncoding()
+    facesCommandBuffer.commit()
+    
+    // Project vertices
+    let verticesCommandBuffer = commandQueue!.makeCommandBuffer()
+    let verticesComputeCommandEncoder = verticesCommandBuffer.makeComputeCommandEncoder()
+    verticesComputeCommandEncoder.setComputePipelineState(computePipelineState!)
+    verticesComputeCommandEncoder.setBuffer(vertices4DBuffer, offset: 0, at: 0)
+    verticesComputeCommandEncoder.setBuffer(vertices3DBuffer, offset: 0, at: 1)
+    verticesComputeCommandEncoder.setBytes(&projectionParameters, length: MemoryLayout<ProjectionParameters>.size, at: 2)
+    let verticesThreadsPerGroup = MTLSize(width: 16, height: 1, depth: 1)
+    let verticesNumThreadGroups = MTLSize(width: vertices.count/verticesThreadsPerGroup.width, height: 1, depth: 1)
+    verticesComputeCommandEncoder.dispatchThreadgroups(verticesNumThreadGroups, threadsPerThreadgroup: verticesThreadsPerGroup)
+    verticesComputeCommandEncoder.endEncoding()
+    verticesCommandBuffer.commit()
   }
   
   override func flagsChanged(with event: NSEvent) {

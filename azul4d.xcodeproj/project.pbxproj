@@ -315,7 +315,6 @@
 					"$(inherited)",
 					/usr/local/Cellar/boost/1.62.0/lib,
 					/usr/local/Cellar/cgal/4.9/lib,
-					/usr/local/Cellar/gmp/6.1.1/lib,
 					/usr/local/Cellar/mpfr/3.1.5/lib,
 					/usr/local/Cellar/gmp/6.1.2/lib,
 				);
@@ -343,7 +342,6 @@
 					"$(inherited)",
 					/usr/local/Cellar/boost/1.62.0/lib,
 					/usr/local/Cellar/cgal/4.9/lib,
-					/usr/local/Cellar/gmp/6.1.1/lib,
 					/usr/local/Cellar/mpfr/3.1.5/lib,
 					/usr/local/Cellar/gmp/6.1.2/lib,
 				);
