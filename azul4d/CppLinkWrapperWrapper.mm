@@ -38,50 +38,38 @@ struct CppLinkWrapper {
   cppLinkWrapper->cppLink->makeHouse();
 }
 
-- (void) iterateOverFaces {
-  cppLinkWrapper->cppLink->currentModelPart = cppLinkWrapper->cppLink->currentModelFaces;
+- (void) initialiseFacesIterator {
+  cppLinkWrapper->cppLink->currentFace = cppLinkWrapper->cppLink->faces.begin();
 }
 
-- (void) iterateOverEdges {
-  cppLinkWrapper->cppLink->currentModelPart = cppLinkWrapper->cppLink->currentModelEdges;
+- (void) advanceFacesIterator {
+  ++cppLinkWrapper->cppLink->currentFace;
 }
 
-- (void) iterateOverVertices {
-  cppLinkWrapper->cppLink->currentModelPart = cppLinkWrapper->cppLink->currentModelVertices;
+- (BOOL) facesIteratorEnded {
+  return cppLinkWrapper->cppLink->currentFace == cppLinkWrapper->cppLink->faces.end();
 }
 
-- (void) initialiseMeshIterator {
-  cppLinkWrapper->cppLink->currentMesh = cppLinkWrapper->cppLink->currentModelPart.begin();
+- (const float *)currentFaceColour {
+  return cppLinkWrapper->cppLink->currentFace->colour;
 }
 
-- (void) advanceMeshIterator {
-  ++cppLinkWrapper->cppLink->currentMesh;
+- (void) initialiseFaceTrianglesIterator {
+  cppLinkWrapper->cppLink->currentFaceTriangle = cppLinkWrapper->cppLink->currentFace->triangles.begin();
 }
 
-- (BOOL) meshIteratorEnded {
-  return cppLinkWrapper->cppLink->currentMesh == cppLinkWrapper->cppLink->currentModelPart.end();
+- (void) advanceFaceTrianglesIterator {
+  ++cppLinkWrapper->cppLink->currentFaceTriangle;
 }
 
-- (void) initialiseTriangleIterator {
-  cppLinkWrapper->cppLink->currentTriangle = cppLinkWrapper->cppLink->currentMesh->triangles.begin();
+- (BOOL) faceTrianglesIteratorEnded {
+  return cppLinkWrapper->cppLink->currentFaceTriangle == cppLinkWrapper->cppLink->currentFace->triangles.end();
 }
 
-- (void) advanceTriangleIterator {
-  ++cppLinkWrapper->cppLink->currentTriangle;
-}
-
-- (BOOL) triangleIteratorEnded {
-  return cppLinkWrapper->cppLink->currentTriangle == cppLinkWrapper->cppLink->currentMesh->triangles.end();
-}
-
-- (const float *)currentTriangleVertex: (long)index {
+- (const float *)currentFaceTriangleVertex: (long)index {
   for (unsigned int i = 0; i < 4; ++i) {
-    cppLinkWrapper->cppLink->currentPointCoordinates[i] = cppLinkWrapper->cppLink->currentTriangle->vertices[index].cartesian(i);
+    cppLinkWrapper->cppLink->currentPointCoordinates[i] = cppLinkWrapper->cppLink->currentFaceTriangle->vertices[index].cartesian(i);
   } return cppLinkWrapper->cppLink->currentPointCoordinates; 
-}
-
-- (const float *)currentMeshColour {
-  return cppLinkWrapper->cppLink->currentMesh->colour;
 }
 
 - (void) dealloc {

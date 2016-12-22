@@ -28,17 +28,24 @@ struct CppLinkWrapper;
 - (id) init;
 - (void) makeTesseract;
 - (void) makeHouse;
-- (void) iterateOverFaces;
-- (void) iterateOverEdges;
-- (void) iterateOverVertices;
-- (void) initialiseMeshIterator;
-- (void) advanceMeshIterator;
-- (BOOL) meshIteratorEnded;
-- (void) initialiseTriangleIterator;
-- (void) advanceTriangleIterator;
-- (BOOL) triangleIteratorEnded;
-- (const float *)currentTriangleVertex: (long)index;
-- (const float *)currentMeshColour;
+
+- (void) initialiseFacesIterator;
+- (void) advanceFacesIterator;
+- (BOOL) facesIteratorEnded;
+- (const float *)currentFaceColour;
+- (void) initialiseFaceTrianglesIterator;
+- (void) advanceFaceTrianglesIterator;
+- (BOOL) faceTrianglesIteratorEnded;
+- (const float *)currentFaceTriangleVertex: (long)index;
+
+- (void) initialiseEdgesIterator;
+- (void) advanceEdgesIterator;
+- (BOOL) edgesIteratorEnded;
+
+- (void) initialiseVerticesIterator;
+- (void) advanceVerticesIterator;
+- (BOOL) verticesIteratorEnded;
+
 - (void) dealloc;
 
 @end

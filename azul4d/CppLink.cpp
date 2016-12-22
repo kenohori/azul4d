@@ -66,69 +66,20 @@ Mesh_d CppLink::refine(Polygon_d &polygon, double ratio, double size) {
   return polygon_refined;
 }
 
-std::vector<Mesh_d> CppLink::generate_edges(std::vector<Polygon_d> &model, double size, double radius, unsigned int circle_segments) {
-  std::vector<Mesh_d> edges_mesh;
-  
-  // Generate a unique set of edges
-  std::map<CGAL::Point_d<Kernel>, std::set<CGAL::Point_d<Kernel>>> edges;
-  for (auto const &polygon: model) {
-    std::vector<CGAL::Point_d<Kernel>>::const_iterator previousVertex = polygon.vertices.begin();
-    std::vector<CGAL::Point_d<Kernel>>::const_iterator currentVertex = previousVertex;
-    ++currentVertex;
-    while (currentVertex != polygon.vertices.end()) {
-      edges[*previousVertex].insert(*currentVertex);
-      ++previousVertex;
-      ++currentVertex;
-    }
-  }
-  
-  // Generates geometries
-  double angle = 2.0*M_PI/circle_segments;
-  for (auto const &edgeStart: edges) {
-    for (auto const &edgeEnd: edgeStart.second) {
-//      std::cout << "Edge (" << edgeStart.first << ", " << edgeEnd << ")" << std::endl;
-      
-    }
-  }
-  
-  return edges_mesh;
+std::vector<Edge_d> CppLink::generateEdges(std::vector<Polygon_d> &model) {
+  std::vector<Edge_d> edges;
+  return edges;
 }
 
-std::vector<Mesh_d> CppLink::generate_vertices(std::vector<Polygon_d> &model, double radius, unsigned int icosphere_refinements) {
-  std::vector<Mesh_d> vertices_mesh;
-  
-  // Generate a unique set of vertices
-  std::set<CGAL::Point_d<Kernel>> vertices;
+std::vector<CGAL::Point_d<Kernel>> CppLink::generateVertices(std::vector<Polygon_d> &model) {
+  std::vector<CGAL::Point_d<Kernel>> vertices;
+  std::set<CGAL::Point_d<Kernel>> uniqueVertices;
   for (auto const &polygon: model) {
     for (auto const &vertex: polygon.vertices) {
-      vertices.insert(vertex);
+      uniqueVertices.insert(vertex);
+      vertices.push_back(vertex);
     }
-  }
-  
-  // Generates geometries
-  double golden_ratio = (1.0+sqrt(5.0))/2.0;
-  double normalising_factor = sqrt(golden_ratio*golden_ratio+1.0);
-  for (auto const &vertex: vertices) {
-//    std::cout << vertex << std::endl;
-    std::vector<CGAL::Point_3<Triangulation_kernel>> icosahedron_vertices;
-    
-    icosahedron_vertices.push_back(CGAL::Point_3<Triangulation_kernel>(-1.0/normalising_factor,  golden_ratio/normalising_factor, 0.0));
-    icosahedron_vertices.push_back(CGAL::Point_3<Triangulation_kernel>( 1.0/normalising_factor,  golden_ratio/normalising_factor, 0.0));
-    icosahedron_vertices.push_back(CGAL::Point_3<Triangulation_kernel>(-1.0/normalising_factor, -golden_ratio/normalising_factor, 0.0));
-    icosahedron_vertices.push_back(CGAL::Point_3<Triangulation_kernel>( 1.0/normalising_factor, -golden_ratio/normalising_factor, 0.0));
-    
-    icosahedron_vertices.push_back(CGAL::Point_3<Triangulation_kernel>(0.0, -1.0/normalising_factor,  golden_ratio/normalising_factor));
-    icosahedron_vertices.push_back(CGAL::Point_3<Triangulation_kernel>(0.0,  1.0/normalising_factor,  golden_ratio/normalising_factor));
-    icosahedron_vertices.push_back(CGAL::Point_3<Triangulation_kernel>(0.0, -1.0/normalising_factor, -golden_ratio/normalising_factor));
-    icosahedron_vertices.push_back(CGAL::Point_3<Triangulation_kernel>(0.0,  1.0/normalising_factor, -golden_ratio/normalising_factor));
-    
-    icosahedron_vertices.push_back(CGAL::Point_3<Triangulation_kernel>( golden_ratio/normalising_factor, 0.0, -1.0/normalising_factor));
-    icosahedron_vertices.push_back(CGAL::Point_3<Triangulation_kernel>( golden_ratio/normalising_factor, 0.0,  1.0/normalising_factor));
-    icosahedron_vertices.push_back(CGAL::Point_3<Triangulation_kernel>(-golden_ratio/normalising_factor, 0.0, -1.0/normalising_factor));
-    icosahedron_vertices.push_back(CGAL::Point_3<Triangulation_kernel>(-golden_ratio/normalising_factor, 0.0,  1.0/normalising_factor));
-  }
-  
-  return vertices_mesh;
+  } return vertices;
 }
 
 Mesh_d CppLink::triangulateUsingBarycentre(Polygon_d &polygon) {
@@ -390,9 +341,9 @@ void CppLink::makeTesseract() {
     tesseract_refined.back().colour[1] = 0.0;
     tesseract_refined.back().colour[2] = 1.0;
     tesseract_refined.back().colour[3] = 0.2;
-  } currentModelFaces = tesseract_refined;
-  currentModelEdges = generate_edges(tesseract, 0.1, 0.01, 4);
-  currentModelVertices = generate_vertices(tesseract, 0.2, 2);
+  } faces = tesseract_refined;
+  edges = generateEdges(tesseract);
+  vertices = generateVertices(tesseract);
 }
 
 void CppLink::makeHouse() {
@@ -814,15 +765,15 @@ void CppLink::makeHouse() {
   house.back().vertices.push_back(points[21]);
   house.back().vertices.push_back(points[1]);
   
-  std::vector<Mesh_d> house_refined;
+  std::vector<Mesh_d> houseRefined;
   for (unsigned int index = 0; index < house.size(); ++index) {
-    house_refined.push_back(refine(house[index], 0.125, 0.1));
-//    house_refined.push_back(triangulateQuad(house[index]));
-    house_refined.back().colour[0] = std::get<0>(materials[materialOfFace[index]]);
-    house_refined.back().colour[1] = std::get<1>(materials[materialOfFace[index]]);
-    house_refined.back().colour[2] = std::get<2>(materials[materialOfFace[index]]);
-    house_refined.back().colour[3] = 0.2;
-  } currentModelFaces = house_refined;
-  currentModelEdges = generate_edges(house, 0.1, 0.01, 4);
-  currentModelVertices = generate_vertices(house, 0.2, 2);
+    houseRefined.push_back(refine(house[index], 0.125, 0.1));
+//    houseRefined(triangulateQuad(house[index]));
+    houseRefined.back().colour[0] = std::get<0>(materials[materialOfFace[index]]);
+    houseRefined.back().colour[1] = std::get<1>(materials[materialOfFace[index]]);
+    houseRefined.back().colour[2] = std::get<2>(materials[materialOfFace[index]]);
+    houseRefined.back().colour[3] = 0.2;
+  } faces = houseRefined;
+  edges = generateEdges(house);
+  vertices = generateVertices(house);
 }

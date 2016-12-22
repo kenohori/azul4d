@@ -51,19 +51,27 @@ struct Mesh_d {
   float colour[4];
 };
 
+struct Edge_d {
+  std::vector<CGAL::Point_d<Kernel>> vertices;
+};
+
 class CppLink {
 public:
-  std::vector<Mesh_d> currentModelFaces, currentModelEdges, currentModelVertices, currentModelPart;
-  std::vector<Mesh_d>::const_iterator currentMesh;
-  std::vector<Triangle_d>::const_iterator currentTriangle;
-  std::vector<CGAL::Point_d<Kernel>>::const_iterator currentPoint;
+  std::vector<Mesh_d> faces;
+  std::vector<Edge_d> edges;
+  std::vector<CGAL::Point_d<Kernel>> vertices;
+  std::vector<Mesh_d>::const_iterator currentFace;
+  std::vector<Edge_d>::const_iterator currentEdge;
+  std::vector<CGAL::Point_d<Kernel>>::const_iterator currentVertex;
+  std::vector<Triangle_d>::const_iterator currentFaceTriangle;
+//  std::vector<CGAL::Point_d<Kernel>>::const_iterator currentPoint;
   float currentPointCoordinates[4];
   
   Mesh_d refine(Polygon_d &polygon, double ratio, double size);
   Mesh_d triangulateUsingBarycentre(Polygon_d &polygon);
   Mesh_d triangulateQuad(Polygon_d &polygon);
-  std::vector<Mesh_d> generate_edges(std::vector<Polygon_d> &model, double size, double radius, unsigned int circle_segments);
-  std::vector<Mesh_d> generate_vertices(std::vector<Polygon_d> &model, double radius, unsigned int icosphere_refinements);
+  std::vector<Edge_d> generateEdges(std::vector<Polygon_d> &model);
+  std::vector<CGAL::Point_d<Kernel>> generateVertices(std::vector<Polygon_d> &model);
   
   void makeTesseract();
   void makeHouse();

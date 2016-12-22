@@ -118,17 +118,16 @@ class MetalView: MTKView {
     let cppLink = CppLinkWrapperWrapper()!
 //    cppLink.makeTesseract()
     cppLink.makeHouse()
-    cppLink.iterateOverFaces()
-    cppLink.initialiseMeshIterator()
-    while !cppLink.meshIteratorEnded() {
-      cppLink.initialiseTriangleIterator()
-      let firstColourComponent = cppLink.currentMeshColour()
+    cppLink.initialiseFacesIterator()
+    while !cppLink.facesIteratorEnded() {
+      cppLink.initialiseFaceTrianglesIterator()
+      let firstColourComponent = cppLink.currentFaceColour()
       let colourBuffer = UnsafeBufferPointer(start: firstColourComponent, count: 4)
       let colourArray = ContiguousArray(colourBuffer)
       let colour = [Float](colourArray)
-      while !cppLink.triangleIteratorEnded() {
+      while !cppLink.faceTrianglesIteratorEnded() {
         for pointIndex in 0..<3 {
-          let firstPointCoordinate = cppLink.currentTriangleVertex(pointIndex)
+          let firstPointCoordinate = cppLink.currentFaceTriangleVertex(pointIndex)
           let pointCoordinatesBuffer = UnsafeBufferPointer(start: firstPointCoordinate, count: 4)
           let pointCoordinatesArray = ContiguousArray(pointCoordinatesBuffer)
           let pointCoordinates = [Float](pointCoordinatesArray)
@@ -136,9 +135,9 @@ class MetalView: MTKView {
           vertices.append(Vertex(position: float4(pointCoordinates[0], pointCoordinates[1], pointCoordinates[2], pointCoordinates[3]),
                                  colour: float4(colour[0], colour[1], colour[2], colour[3])))
         }
-        cppLink.advanceTriangleIterator()
+        cppLink.advanceFaceTrianglesIterator()
       }
-      cppLink.advanceMeshIterator()
+      cppLink.advanceFacesIterator()
     }
     Swift.print("\(vertices.count) vertices")
     vertices4DBuffer = device!.makeBuffer(bytes: vertices, length: MemoryLayout<Vertex>.size*vertices.count, options: [])
