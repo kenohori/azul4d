@@ -188,7 +188,6 @@ class MetalView: MTKView {
     verticesComputeCommandEncoder.dispatchThreadgroups(verticesNumThreadGroups, threadsPerThreadgroup: verticesThreadsPerGroup)
     verticesComputeCommandEncoder.endEncoding()
     verticesCommandBuffer.commit()
-    
   }
   
   func generateVertices() {
@@ -348,6 +347,10 @@ class MetalView: MTKView {
     }
     
     verticesFacesBuffer = device!.makeBuffer(bytes: verticesVertices, length: MemoryLayout<Vertex>.size*verticesVertices.count, options: [])
+  }
+  
+  func generateEdges() {
+    
   }
   
   override var acceptsFirstResponder: Bool {

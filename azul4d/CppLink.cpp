@@ -67,7 +67,23 @@ Mesh_d CppLink::refine(Polygon_d &polygon, double ratio, double size) {
 }
 
 std::vector<Edge_d> CppLink::generateEdges(std::vector<Polygon_d> &model) {
+  
+  // Generate a unique set of edges
+  std::map<CGAL::Point_d<Kernel>, std::set<CGAL::Point_d<Kernel>>> uniqueEdges;
+  for (auto const &polygon: model) {
+    std::vector<CGAL::Point_d<Kernel>>::const_iterator previousVertex = polygon.vertices.begin();
+    std::vector<CGAL::Point_d<Kernel>>::const_iterator currentVertex = previousVertex;
+    ++currentVertex;
+    while (currentVertex != polygon.vertices.end()) {
+      uniqueEdges[*previousVertex].insert(*currentVertex);
+      ++previousVertex;
+      ++currentVertex;
+    }
+  }
+  
   std::vector<Edge_d> edges;
+  unsigned int splitInto = 8;
+  
   return edges;
 }
 
