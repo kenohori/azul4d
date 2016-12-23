@@ -192,12 +192,14 @@ class MetalView: MTKView {
   }
   
   func generateVertices() {
+    let radius: Float = 0.03
+    let refinements: UInt = 0
+    
     let vertexData = NSData(bytesNoCopy: vertices3DBuffer!.contents(), length: MemoryLayout<Vertex>.size*vertices.count, freeWhenDone: false)
     var projectedVertices = [Vertex](vertices)
     vertexData.getBytes(&projectedVertices, length: MemoryLayout<Vertex>.size*vertices.count)
-    let goldenRatio: Float = (1.0+sqrt(5.0))/2.0;
-    let radius = 0.1
-    let normalisingFactor: Float = sqrt(goldenRatio*goldenRatio+1.0)/radius;
+    let goldenRatio: Float = (1.0+sqrtf(5.0))/2.0;
+    let normalisingFactor: Float = sqrtf(goldenRatio*goldenRatio+1.0);
     
     var icosahedronVertices = [float4]()
     icosahedronVertices.append(float4(-1.0/normalisingFactor,  goldenRatio/normalisingFactor, 0.0, 0.0))
@@ -220,87 +222,129 @@ class MetalView: MTKView {
       
 //      Swift.print("Vertex: \(vertex.position)")
 //      Swift.print("Ico: \(vertex.position+icosahedronVertices[0])")
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[0], colour: vertex.colour))
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[11], colour: vertex.colour))
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[5], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[0], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[11], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[5], colour: vertex.colour))
       
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[0], colour: vertex.colour))
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[5], colour: vertex.colour))
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[1], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[0], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[5], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[1], colour: vertex.colour))
       
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[0], colour: vertex.colour))
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[1], colour: vertex.colour))
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[7], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[0], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[1], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[7], colour: vertex.colour))
       
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[0], colour: vertex.colour))
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[7], colour: vertex.colour))
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[10], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[0], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[7], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[10], colour: vertex.colour))
       
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[0], colour: vertex.colour))
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[10], colour: vertex.colour))
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[11], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[0], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[10], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[11], colour: vertex.colour))
       
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[1], colour: vertex.colour))
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[5], colour: vertex.colour))
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[9], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[1], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[5], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[9], colour: vertex.colour))
       
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[5], colour: vertex.colour))
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[11], colour: vertex.colour))
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[4], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[5], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[11], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[4], colour: vertex.colour))
       
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[11], colour: vertex.colour))
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[10], colour: vertex.colour))
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[2], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[11], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[10], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[2], colour: vertex.colour))
       
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[10], colour: vertex.colour))
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[7], colour: vertex.colour))
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[6], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[10], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[7], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[6], colour: vertex.colour))
       
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[7], colour: vertex.colour))
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[1], colour: vertex.colour))
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[8], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[7], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[1], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[8], colour: vertex.colour))
       
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[3], colour: vertex.colour))
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[9], colour: vertex.colour))
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[4], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[3], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[9], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[4], colour: vertex.colour))
       
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[3], colour: vertex.colour))
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[4], colour: vertex.colour))
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[2], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[3], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[4], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[2], colour: vertex.colour))
       
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[3], colour: vertex.colour))
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[2], colour: vertex.colour))
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[6], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[3], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[2], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[6], colour: vertex.colour))
       
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[3], colour: vertex.colour))
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[6], colour: vertex.colour))
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[8], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[3], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[6], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[8], colour: vertex.colour))
       
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[3], colour: vertex.colour))
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[8], colour: vertex.colour))
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[9], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[3], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[8], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[9], colour: vertex.colour))
       
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[4], colour: vertex.colour))
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[9], colour: vertex.colour))
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[5], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[4], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[9], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[5], colour: vertex.colour))
       
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[2], colour: vertex.colour))
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[4], colour: vertex.colour))
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[11], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[2], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[4], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[11], colour: vertex.colour))
       
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[6], colour: vertex.colour))
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[2], colour: vertex.colour))
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[10], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[6], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[2], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[10], colour: vertex.colour))
       
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[8], colour: vertex.colour))
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[6], colour: vertex.colour))
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[7], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[8], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[6], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[7], colour: vertex.colour))
       
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[9], colour: vertex.colour))
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[8], colour: vertex.colour))
-      vertexVertices.append(Vertex(position: vertex.position+icosahedronVertices[1], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[9], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[8], colour: vertex.colour))
+      vertexVertices.append(Vertex(position: icosahedronVertices[1], colour: vertex.colour))
       
-      verticesVertices.append(contentsOf: vertexVertices)
+      for _ in 0..<refinements {
+        var vertexVerticesRefined = [Vertex]()
+        
+        for currentVertexVerticesIndex in 0..<vertexVertices.count/3 {
+          let currentVertex0 = vertexVertices[3*currentVertexVerticesIndex]
+          let currentVertex1 = vertexVertices[3*currentVertexVerticesIndex+1]
+          let currentVertex2 = vertexVertices[3*currentVertexVerticesIndex+2]
+          
+          var midPoint01 = Vertex(position: 0.5*(currentVertex0.position+currentVertex1.position), colour: currentVertex0.colour)
+          var midPoint12 = Vertex(position: 0.5*(currentVertex1.position+currentVertex2.position), colour: currentVertex1.colour)
+          var midPoint20 = Vertex(position: 0.5*(currentVertex2.position+currentVertex0.position), colour: currentVertex2.colour)
+          
+          let midPointDistanceToOrigin: Float = sqrtf(midPoint01.position.x*midPoint01.position.x+midPoint01.position.y*midPoint01.position.y+midPoint01.position.z*midPoint01.position.z)
+          midPoint01.position *= 1.0/midPointDistanceToOrigin
+          midPoint12.position *= 1.0/midPointDistanceToOrigin
+          midPoint20.position *= 1.0/midPointDistanceToOrigin
+          
+          vertexVerticesRefined.append(currentVertex0)
+          vertexVerticesRefined.append(midPoint01)
+          vertexVerticesRefined.append(midPoint20)
+          
+          vertexVerticesRefined.append(currentVertex1)
+          vertexVerticesRefined.append(midPoint12)
+          vertexVerticesRefined.append(midPoint01)
+          
+          vertexVerticesRefined.append(currentVertex2)
+          vertexVerticesRefined.append(midPoint20)
+          vertexVerticesRefined.append(midPoint12)
+          
+          vertexVerticesRefined.append(midPoint01)
+          vertexVerticesRefined.append(midPoint12)
+          vertexVerticesRefined.append(midPoint20)
+        }
+        
+        vertexVertices = vertexVerticesRefined
+      }
+      
+      var vertexVerticesTranslated = [Vertex]()
+      for vertexVertex in vertexVertices {
+        vertexVerticesTranslated.append(Vertex(position: vertex.position+(radius*vertexVertex.position), colour: vertex.colour))
+      }
+      
+      verticesVertices.append(contentsOf: vertexVerticesTranslated)
     }
     
     verticesFacesBuffer = device!.makeBuffer(bytes: verticesVertices, length: MemoryLayout<Vertex>.size*verticesVertices.count, options: [])
