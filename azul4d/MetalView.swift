@@ -51,6 +51,7 @@ class MetalView: MTKView {
   var projectionParameters = ProjectionParameters()
   var faces = [Vertex]()
   var edges = [Vertex]()
+  var edgeVerticesCount = [UInt]()
   var vertices = [Vertex]()
   var faces4DBuffer: MTLBuffer?
   var faces3DBuffer: MTLBuffer?
@@ -155,9 +156,25 @@ class MetalView: MTKView {
     // Get edges
     cppLink.initialiseEdgesIterator()
     while !cppLink.edgesIteratorEnded() {
-      
+      cppLink.initialiseEdgeVerticesIterator()
+      var verticesInEdgeCount: UInt = 0
+      while !cppLink.edgeVerticesIteratorEnded() {
+        let firstPointCoordinate = cppLink.currentEdgeVertex()
+        let pointCoordinatesBuffer = UnsafeBufferPointer(start: firstPointCoordinate, count: 4)
+        let pointCoordinatesArray = ContiguousArray(pointCoordinatesBuffer)
+        let pointCoordinates = [Float](pointCoordinatesArray)
+        edges.append(Vertex(position: float4(pointCoordinates[0], pointCoordinates[1], pointCoordinates[2], pointCoordinates[3]),
+                            colour: float4(0.0, 0.0, 0.0, 1.0)))
+        Swift.print(edges.last!)
+        verticesInEdgeCount += 1
+        cppLink.advanceEdgeVerticesIterator()
+      }
+      edgeVerticesCount.append(verticesInEdgeCount)
       cppLink.advanceEdgesIterator()
     }
+    Swift.print(edgeVerticesCount)
+    edges4DBuffer = device!.makeBuffer(bytes: edges, length: MemoryLayout<Vertex>.size*edges.count, options: [])
+    edges3DBuffer = device!.makeBuffer(length: MemoryLayout<Vertex>.size*edges.count, options: [])
     
     // Get vertices
     cppLink.initialiseVerticesIterator()
@@ -194,7 +211,7 @@ class MetalView: MTKView {
     edgesComputeCommandEncoder.setBuffer(edges4DBuffer, offset: 0, at: 0)
     edgesComputeCommandEncoder.setBuffer(edges3DBuffer, offset: 0, at: 1)
     edgesComputeCommandEncoder.setBytes(&projectionParameters, length: MemoryLayout<ProjectionParameters>.size, at: 2)
-    let edgesThreadsPerGroup = MTLSize(width: 256, height: 1, depth: 1)
+    let edgesThreadsPerGroup = MTLSize(width: 16, height: 1, depth: 1)
     let edgesNumThreadGroups = MTLSize(width: edges.count/edgesThreadsPerGroup.width, height: 1, depth: 1)
     edgesComputeCommandEncoder.dispatchThreadgroups(edgesNumThreadGroups, threadsPerThreadgroup: edgesThreadsPerGroup)
     edgesComputeCommandEncoder.endEncoding()
