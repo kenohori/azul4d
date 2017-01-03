@@ -82,7 +82,29 @@ std::vector<Edge_d> CppLink::generateEdges(std::vector<Polygon_d> &model) {
   }
   
   std::vector<Edge_d> edges;
-  unsigned int splitInto = 8;
+  CGAL::Vector_d<Kernel>::FT splitEvery = 0.3;
+  
+  for (auto const &edgeStart: uniqueEdges) {
+    for (auto const &edgeEnd: edgeStart.second) {
+//      std::cout << "Start: " << edgeStart.first << std::endl;
+//      std::cout << "End: " << edgeEnd << std::endl;
+      CGAL::Vector_d<Kernel> edge = edgeEnd-edgeStart.first;
+      CGAL::Vector_d<Kernel>::FT edgeNorm = sqrt(edge.squared_length());
+//      std::cout << "Edge vector: " << edge << " with norm: " << edgeNorm << std::endl;
+      CGAL::Vector_d<Kernel> edgeIncrement = (splitEvery/edgeNorm)*edge;
+      unsigned int increments = floor(edgeNorm/splitEvery);
+//      std::cout << "Increment vector: " << edgeIncrement << " with norm: " << sqrt(edgeIncrement.squared_length()) << std::endl;
+//      std::cout << "Increments: " << increments << std::endl;
+      edges.push_back(Edge_d());
+      for (unsigned int currentIncrement = 0; currentIncrement <= increments; ++currentIncrement) {
+        edges.back().vertices.push_back(edgeStart.first+currentIncrement*edgeIncrement);
+//        std::cout << "\t" << edges.back().vertices.back() << std::endl;
+      } if (edges.back().vertices.back() != edgeEnd) {
+        edges.back().vertices.push_back(edgeEnd);
+//        std::cout << "\t" << edges.back().vertices.back() << std::endl;
+      }
+    }
+  }
   
   return edges;
 }

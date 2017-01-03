@@ -387,6 +387,7 @@ class MetalView: MTKView {
     commandBuffer.commit()
     
     generateVertices()
+    generateEdges()
   }
   
   override func setFrameSize(_ newSize: NSSize) {
