@@ -54,6 +54,8 @@ class MetalView: MTKView {
   var vertices = [Vertex]()
   var faces4DBuffer: MTLBuffer?
   var faces3DBuffer: MTLBuffer?
+  var edges4DBuffer: MTLBuffer?
+  var edges3DBuffer: MTLBuffer?
   var vertices4DBuffer: MTLBuffer?
   var vertices3DBuffer: MTLBuffer?
   var verticesFacesBuffer: MTLBuffer?
@@ -119,11 +121,12 @@ class MetalView: MTKView {
     
     renderingConstants.modelViewProjectionMatrix = matrix_multiply(projectionMatrix, matrix_multiply(viewMatrix, modelMatrix))
     
-    // Data
+    // Create data
     let cppLink = CppLinkWrapperWrapper()!
 //    cppLink.makeTesseract()
     cppLink.makeHouse()
     
+    // Get faces
     cppLink.initialiseFacesIterator()
     while !cppLink.facesIteratorEnded() {
       cppLink.initialiseFaceTrianglesIterator()
@@ -149,6 +152,14 @@ class MetalView: MTKView {
     faces4DBuffer = device!.makeBuffer(bytes: faces, length: MemoryLayout<Vertex>.size*faces.count, options: [])
     faces3DBuffer = device!.makeBuffer(length: MemoryLayout<Vertex>.size*faces.count, options: [])
     
+    // Get edges
+    cppLink.initialiseEdgesIterator()
+    while !cppLink.edgesIteratorEnded() {
+      
+      cppLink.advanceEdgesIterator()
+    }
+    
+    // Get vertices
     cppLink.initialiseVerticesIterator()
     while !cppLink.verticesIteratorEnded() {
       let firstPointCoordinate = cppLink.currentVertex()
@@ -175,6 +186,19 @@ class MetalView: MTKView {
     facesComputeCommandEncoder.dispatchThreadgroups(facesNumThreadGroups, threadsPerThreadgroup: facesThreadsPerGroup)
     facesComputeCommandEncoder.endEncoding()
     facesCommandBuffer.commit()
+    
+    // Project edges
+    let edgesCommandBuffer = commandQueue!.makeCommandBuffer()
+    let edgesComputeCommandEncoder = edgesCommandBuffer.makeComputeCommandEncoder()
+    edgesComputeCommandEncoder.setComputePipelineState(computePipelineState!)
+    edgesComputeCommandEncoder.setBuffer(edges4DBuffer, offset: 0, at: 0)
+    edgesComputeCommandEncoder.setBuffer(edges3DBuffer, offset: 0, at: 1)
+    edgesComputeCommandEncoder.setBytes(&projectionParameters, length: MemoryLayout<ProjectionParameters>.size, at: 2)
+    let edgesThreadsPerGroup = MTLSize(width: 256, height: 1, depth: 1)
+    let edgesNumThreadGroups = MTLSize(width: edges.count/edgesThreadsPerGroup.width, height: 1, depth: 1)
+    edgesComputeCommandEncoder.dispatchThreadgroups(edgesNumThreadGroups, threadsPerThreadgroup: edgesThreadsPerGroup)
+    edgesComputeCommandEncoder.endEncoding()
+    edgesCommandBuffer.commit()
     
     // Project vertices
     let verticesCommandBuffer = commandQueue!.makeCommandBuffer()

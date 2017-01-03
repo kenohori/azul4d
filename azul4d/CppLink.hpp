@@ -64,7 +64,7 @@ public:
   std::vector<Edge_d>::const_iterator currentEdge;
   std::vector<CGAL::Point_d<Kernel>>::const_iterator currentVertex;
   std::vector<Triangle_d>::const_iterator currentFaceTriangle;
-//  std::vector<CGAL::Point_d<Kernel>>::const_iterator currentPoint;
+  std::vector<CGAL::Point_d<Kernel>>::const_iterator currentEdgeVertex;
   float currentPointCoordinates[4];
   
   Mesh_d refine(Polygon_d &polygon, double ratio, double size);

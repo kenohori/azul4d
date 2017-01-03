@@ -84,6 +84,24 @@ struct CppLinkWrapper {
   return cppLinkWrapper->cppLink->currentEdge == cppLinkWrapper->cppLink->edges.end();
 }
 
+- (void) initialiseEdgeVerticesIterator {
+  cppLinkWrapper->cppLink->currentEdgeVertex = cppLinkWrapper->cppLink->currentEdge->vertices.begin();
+}
+
+- (BOOL) edgeVerticesIteratorEnded {
+  return cppLinkWrapper->cppLink->currentEdgeVertex == cppLinkWrapper->cppLink->currentEdge->vertices.end();
+}
+
+- (void) advanceEdgeVerticesIterator {
+  ++cppLinkWrapper->cppLink->currentEdgeVertex;
+}
+
+- (const float *)currentEdgeVertex {
+  for (unsigned int i = 0; i < 4; ++i) {
+    cppLinkWrapper->cppLink->currentPointCoordinates[i] = cppLinkWrapper->cppLink->currentEdgeVertex->cartesian(i);
+  } return cppLinkWrapper->cppLink->currentPointCoordinates;
+}
+
 - (void) initialiseVerticesIterator {
   cppLinkWrapper->cppLink->currentVertex = cppLinkWrapper->cppLink->vertices.begin();
 }

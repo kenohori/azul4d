@@ -41,6 +41,10 @@ struct CppLinkWrapper;
 - (void) initialiseEdgesIterator;
 - (void) advanceEdgesIterator;
 - (BOOL) edgesIteratorEnded;
+- (void) initialiseEdgeVerticesIterator;
+- (BOOL) edgeVerticesIteratorEnded;
+- (void) advanceEdgeVerticesIterator;
+- (const float *)currentEdgeVertex;
 
 - (void) initialiseVerticesIterator;
 - (void) advanceVerticesIterator;
