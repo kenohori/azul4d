@@ -393,7 +393,7 @@ class MetalView: MTKView {
   
   func generateEdges() {
     
-    let circleSegments: UInt = 4
+    let circleSegments: UInt = 3
     let radius: Float = 0.01
     let angleIncrement: Float = 2.0*3.141592653589793/Float(circleSegments)
     
@@ -412,15 +412,6 @@ class MetalView: MTKView {
 //        Swift.print("\tSubedge from \(projectedEdges[startSubindex]) to \(projectedEdges[endSubindex])")
         
         let edgeVector = projectedEdges[endSubindex].position-projectedEdges[startSubindex].position
-        
-        // Formula from http://inside.mines.edu/fs_home/gmurray/ArbitraryAxisRotation/
-        let a = projectedEdges[startSubindex].position.x
-        let b = projectedEdges[startSubindex].position.y
-        let c = projectedEdges[startSubindex].position.z
-        let u = edgeVector.x
-        let v = edgeVector.y
-        let w = edgeVector.z
-        let theta = angleIncrement
         
         var perpendicularVector: float3
         if edgeVector.x == 0.0 {
@@ -461,12 +452,26 @@ class MetalView: MTKView {
                                         projectedEdges[endSubindex].position.y/projectedEdges[endSubindex].position.w,
                                         projectedEdges[endSubindex].position.z/projectedEdges[endSubindex].position.w)+nextPerpendicularVector
         for _ in 0..<circleSegments {
+          // Formula from http://inside.mines.edu/fs_home/gmurray/ArbitraryAxisRotation/
+          var a = projectedEdges[startSubindex].position.x
+          var b = projectedEdges[startSubindex].position.y
+          var c = projectedEdges[startSubindex].position.z
+          var u = edgeVector.x
+          var v = edgeVector.y
+          var w = edgeVector.z
+          let theta = angleIncrement
           var x = previousPointAtStart.x
           var y = previousPointAtStart.y
           var z = previousPointAtStart.z
           var nextPointAtStart = float3((a*(v*v+w*w)-u*(b*v+c*w-u*x-v*y-w*z))*(1.0-cos(theta))+x*cos(theta)+(-c*v+b*w-w*y+v*z)*sin(theta),
                                         (b*(u*u+w*w)-v*(a*u+c*w-u*x-v*y-w*z))*(1.0-cos(theta))+y*cos(theta)+(c*u-a*w+w*x-u*z)*sin(theta),
                                         (c*(u*u+v*v)-w*(a*u+b*v-u*x-v*y-w*z))*(1.0-cos(theta))+z*cos(theta)+(-b*u+a*v-v*x+u*y)*sin(theta))
+          a = projectedEdges[endSubindex].position.x
+          b = projectedEdges[endSubindex].position.y
+          c = projectedEdges[endSubindex].position.z
+          u = nextEdgeVector.x
+          v = nextEdgeVector.y
+          w = nextEdgeVector.z
           x = previousPointAtEnd.x
           y = previousPointAtEnd.y
           z = previousPointAtEnd.z
