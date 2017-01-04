@@ -393,8 +393,8 @@ class MetalView: MTKView {
   
   func generateEdges() {
     
-    let circleSegments: UInt = 8
-    let radius: Float = 0.015
+    let circleSegments: UInt = 4
+    let radius: Float = 0.01
     let angleIncrement: Float = 2.0*3.141592653589793/Float(circleSegments)
     
     let edgeData = NSData(bytesNoCopy: edges3DBuffer!.contents(), length: MemoryLayout<Vertex>.size*edges.count, freeWhenDone: false)
@@ -421,19 +421,6 @@ class MetalView: MTKView {
         let v = edgeVector.y
         let w = edgeVector.z
         let theta = angleIncrement
-//        let rotationAroundEdge = matrix_from_columns(vector4(u*u+(v*v+w*w)*cos(theta),
-//                                                             u*v*(1.0-cos(theta))-w*sin(theta),
-//                                                             u*w*(1.0-cos(theta))+v*sin(theta),
-//                                                             (a*(v*v+w*w)-u*(b*v+c*w))*(1.0-cos(theta)+(b*w-c*v)*sin(theta))),
-//                                                     vector4(u*v*(1.0-cos(theta))+w*sin(theta),
-//                                                             v*v+(u*u+w*w)*cos(theta),
-//                                                             v*w*(1.0-cos(theta))-u*sin(theta),
-//                                                             (b*(u*u+w*w)-v*(a*u+c*w))*(1.0-cos(theta)+(c*u-a*w)*sin(theta))),
-//                                                     vector4(u*w*(1.0-cos(theta))-v*sin(theta),
-//                                                             v*w*(1.0-cos(theta))+u*sin(theta),
-//                                                             w*w+(u*u+v*v)*cos(theta),
-//                                                             (c*(u*u+v*v)-w*(a*u+b*v))*(1.0-cos(theta)+(a*v-b*u)*sin(theta))),
-//                                                     vector4(0.0, 0.0, 0.0, 1.0))
         
         var perpendicularVector: float3
         if edgeVector.x == 0.0 {
@@ -448,12 +435,31 @@ class MetalView: MTKView {
         let perpendicularVectorNorm = sqrtf(perpendicularVector.x*perpendicularVector.x+perpendicularVector.y*perpendicularVector.y+perpendicularVector.z*perpendicularVector.z)
         perpendicularVector *= radius/perpendicularVectorNorm
         
+        let nextEdgeVector: float4
+        if endSubindex == endIndex {
+          nextEdgeVector = edgeVector
+        } else {
+          nextEdgeVector = projectedEdges[endSubindex+1].position-projectedEdges[endSubindex].position
+        }
+        var nextPerpendicularVector: float3
+        if nextEdgeVector.x == 0.0 {
+          nextPerpendicularVector = float3(1.0, 0.0, 0.0)
+        } else if nextEdgeVector.y == 0.0 {
+          nextPerpendicularVector = float3(0.0, 1.0, 0.0)
+        } else if nextEdgeVector.z == 0.0 {
+          nextPerpendicularVector = float3(0.0, 0.0, 1.0)
+        } else {
+          nextPerpendicularVector = float3(1.0, 1.0, -1.0 * (nextEdgeVector.x + nextEdgeVector.y) / nextEdgeVector.z)
+        }
+        let nextPerpendicularVectorNorm = sqrtf(nextPerpendicularVector.x*nextPerpendicularVector.x+nextPerpendicularVector.y*nextPerpendicularVector.y+nextPerpendicularVector.z*nextPerpendicularVector.z)
+        nextPerpendicularVector *= radius/nextPerpendicularVectorNorm
+        
         var previousPointAtStart = float3(projectedEdges[startSubindex].position.x/projectedEdges[startSubindex].position.w,
                                           projectedEdges[startSubindex].position.y/projectedEdges[startSubindex].position.w,
                                           projectedEdges[startSubindex].position.z/projectedEdges[startSubindex].position.w)+perpendicularVector
         var previousPointAtEnd = float3(projectedEdges[endSubindex].position.x/projectedEdges[endSubindex].position.w,
                                         projectedEdges[endSubindex].position.y/projectedEdges[endSubindex].position.w,
-                                        projectedEdges[endSubindex].position.z/projectedEdges[endSubindex].position.w)+perpendicularVector
+                                        projectedEdges[endSubindex].position.z/projectedEdges[endSubindex].position.w)+nextPerpendicularVector
         for _ in 0..<circleSegments {
           var x = previousPointAtStart.x
           var y = previousPointAtStart.y

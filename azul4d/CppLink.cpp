@@ -82,7 +82,7 @@ std::vector<Edge_d> CppLink::generateEdges(std::vector<Polygon_d> &model) {
   }
   
   std::vector<Edge_d> edges;
-  CGAL::Vector_d<Kernel>::FT splitEvery = 0.3;
+  CGAL::Vector_d<Kernel>::FT splitEvery = 0.1;
   
   for (auto const &edgeStart: uniqueEdges) {
     for (auto const &edgeEnd: edgeStart.second) {
