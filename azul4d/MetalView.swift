@@ -57,7 +57,7 @@ class MetalView: MTKView {
   var faces3DBuffer: MTLBuffer?
   var edges4DBuffer: MTLBuffer?
   var edges3DBuffer: MTLBuffer?
-  var edgesFacesBuffer: MTLBuffer?
+  var edgesEdgesBuffer: MTLBuffer?
   var vertices4DBuffer: MTLBuffer?
   var vertices3DBuffer: MTLBuffer?
   var verticesFacesBuffer: MTLBuffer?
@@ -233,8 +233,8 @@ class MetalView: MTKView {
   }
   
   func generateVertices() {
-    let radius: Float = 0.03
-    let refinements: UInt = 0
+    let radius: Float = 0.02
+    let refinements: UInt = 1
     
     let vertexData = NSData(bytesNoCopy: vertices3DBuffer!.contents(), length: MemoryLayout<Vertex>.size*vertices.count, freeWhenDone: false)
     var projectedVertices = [Vertex](vertices)
@@ -393,116 +393,27 @@ class MetalView: MTKView {
   
   func generateEdges() {
     
-    let circleSegments: UInt = 3
-    let radius: Float = 0.01
-    let angleIncrement: Float = 2.0*3.141592653589793/Float(circleSegments)
-    
     let edgeData = NSData(bytesNoCopy: edges3DBuffer!.contents(), length: MemoryLayout<Vertex>.size*edges.count, freeWhenDone: false)
     var projectedEdges = [Vertex](edges)
     edgeData.getBytes(&projectedEdges, length: MemoryLayout<Vertex>.size*edges.count)
     
     var startIndex: Int = 0
-    var edgeFaces = [Vertex]()
+    var edgeEdges = [Vertex]()
     for verticesCountInCurrentEdge in edgeVerticesCount {
       let endIndex: Int = startIndex+Int(verticesCountInCurrentEdge)-1
 //      Swift.print("Start: \(startIndex) End: \(endIndex)")
       
       for startSubindex in startIndex..<endIndex {
         let endSubindex: Int = startSubindex+1
-//        Swift.print("\tSubedge from \(projectedEdges[startSubindex]) to \(projectedEdges[endSubindex])")
         
-        let edgeVector = projectedEdges[endSubindex].position-projectedEdges[startSubindex].position
-        
-        var perpendicularVector: float3
-        if edgeVector.x == 0.0 {
-          perpendicularVector = float3(1.0, 0.0, 0.0)
-        } else if edgeVector.y == 0.0 {
-          perpendicularVector = float3(0.0, 1.0, 0.0)
-        } else if edgeVector.z == 0.0 {
-          perpendicularVector = float3(0.0, 0.0, 1.0)
-        } else {
-          perpendicularVector = float3(1.0, 1.0, -1.0 * (edgeVector.x + edgeVector.y) / edgeVector.z)
-        }
-        let perpendicularVectorNorm = sqrtf(perpendicularVector.x*perpendicularVector.x+perpendicularVector.y*perpendicularVector.y+perpendicularVector.z*perpendicularVector.z)
-        perpendicularVector *= radius/perpendicularVectorNorm
-        
-        let nextEdgeVector: float4
-        if endSubindex == endIndex {
-          nextEdgeVector = edgeVector
-        } else {
-          nextEdgeVector = projectedEdges[endSubindex+1].position-projectedEdges[endSubindex].position
-        }
-        var nextPerpendicularVector: float3
-        if nextEdgeVector.x == 0.0 {
-          nextPerpendicularVector = float3(1.0, 0.0, 0.0)
-        } else if nextEdgeVector.y == 0.0 {
-          nextPerpendicularVector = float3(0.0, 1.0, 0.0)
-        } else if nextEdgeVector.z == 0.0 {
-          nextPerpendicularVector = float3(0.0, 0.0, 1.0)
-        } else {
-          nextPerpendicularVector = float3(1.0, 1.0, -1.0 * (nextEdgeVector.x + nextEdgeVector.y) / nextEdgeVector.z)
-        }
-        let nextPerpendicularVectorNorm = sqrtf(nextPerpendicularVector.x*nextPerpendicularVector.x+nextPerpendicularVector.y*nextPerpendicularVector.y+nextPerpendicularVector.z*nextPerpendicularVector.z)
-        nextPerpendicularVector *= radius/nextPerpendicularVectorNorm
-        
-        var previousPointAtStart = float3(projectedEdges[startSubindex].position.x/projectedEdges[startSubindex].position.w,
-                                          projectedEdges[startSubindex].position.y/projectedEdges[startSubindex].position.w,
-                                          projectedEdges[startSubindex].position.z/projectedEdges[startSubindex].position.w)+perpendicularVector
-        var previousPointAtEnd = float3(projectedEdges[endSubindex].position.x/projectedEdges[endSubindex].position.w,
-                                        projectedEdges[endSubindex].position.y/projectedEdges[endSubindex].position.w,
-                                        projectedEdges[endSubindex].position.z/projectedEdges[endSubindex].position.w)+nextPerpendicularVector
-        for _ in 0..<circleSegments {
-          // Formula from http://inside.mines.edu/fs_home/gmurray/ArbitraryAxisRotation/
-          var a = projectedEdges[startSubindex].position.x
-          var b = projectedEdges[startSubindex].position.y
-          var c = projectedEdges[startSubindex].position.z
-          var u = edgeVector.x
-          var v = edgeVector.y
-          var w = edgeVector.z
-          let theta = angleIncrement
-          var x = previousPointAtStart.x
-          var y = previousPointAtStart.y
-          var z = previousPointAtStart.z
-          var nextPointAtStart = float3((a*(v*v+w*w)-u*(b*v+c*w-u*x-v*y-w*z))*(1.0-cos(theta))+x*cos(theta)+(-c*v+b*w-w*y+v*z)*sin(theta),
-                                        (b*(u*u+w*w)-v*(a*u+c*w-u*x-v*y-w*z))*(1.0-cos(theta))+y*cos(theta)+(c*u-a*w+w*x-u*z)*sin(theta),
-                                        (c*(u*u+v*v)-w*(a*u+b*v-u*x-v*y-w*z))*(1.0-cos(theta))+z*cos(theta)+(-b*u+a*v-v*x+u*y)*sin(theta))
-          a = projectedEdges[endSubindex].position.x
-          b = projectedEdges[endSubindex].position.y
-          c = projectedEdges[endSubindex].position.z
-          u = nextEdgeVector.x
-          v = nextEdgeVector.y
-          w = nextEdgeVector.z
-          x = previousPointAtEnd.x
-          y = previousPointAtEnd.y
-          z = previousPointAtEnd.z
-          var nextPointAtEnd = float3((a*(v*v+w*w)-u*(b*v+c*w-u*x-v*y-w*z))*(1.0-cos(theta))+x*cos(theta)+(-c*v+b*w-w*y+v*z)*sin(theta),
-                                      (b*(u*u+w*w)-v*(a*u+c*w-u*x-v*y-w*z))*(1.0-cos(theta))+y*cos(theta)+(c*u-a*w+w*x-u*z)*sin(theta),
-                                      (c*(u*u+v*v)-w*(a*u+b*v-u*x-v*y-w*z))*(1.0-cos(theta))+z*cos(theta)+(-b*u+a*v-v*x+u*y)*sin(theta))
-          
-          edgeFaces.append(Vertex(position: float4(previousPointAtStart.x, previousPointAtStart.y, previousPointAtStart.z, 1.0),
-                                  colour: projectedEdges[startSubindex].colour))
-          edgeFaces.append(Vertex(position: float4(previousPointAtEnd.x, previousPointAtEnd.y, previousPointAtEnd.z, 1.0),
-                                  colour: projectedEdges[endSubindex].colour))
-          edgeFaces.append(Vertex(position: float4(nextPointAtStart.x, nextPointAtStart.y, nextPointAtStart.z, 1.0),
-                                  colour: projectedEdges[startSubindex].colour))
-          
-          edgeFaces.append(Vertex(position: float4(previousPointAtEnd.x, previousPointAtEnd.y, previousPointAtEnd.z, 1.0),
-                                  colour: projectedEdges[endSubindex].colour))
-          edgeFaces.append(Vertex(position: float4(nextPointAtEnd.x, nextPointAtEnd.y, nextPointAtEnd.z, 1.0),
-                                  colour: projectedEdges[endSubindex].colour))
-          edgeFaces.append(Vertex(position: float4(nextPointAtStart.x, nextPointAtStart.y, nextPointAtStart.z, 1.0),
-                                  colour: projectedEdges[startSubindex].colour))
-          
-          previousPointAtStart = nextPointAtStart
-          previousPointAtEnd = nextPointAtEnd
-        }
-        
+        edgeEdges.append(projectedEdges[startSubindex])
+        edgeEdges.append(projectedEdges[endSubindex])
       }
       
       startIndex += Int(verticesCountInCurrentEdge)
     }
     
-    edgesFacesBuffer = device!.makeBuffer(bytes: edgeFaces, length: MemoryLayout<Vertex>.size*edgeFaces.count, options: [])
+    edgesEdgesBuffer = device!.makeBuffer(bytes: edgeEdges, length: MemoryLayout<Vertex>.size*edgeEdges.count, options: [])
   }
   
   override var acceptsFirstResponder: Bool {
@@ -529,10 +440,10 @@ class MetalView: MTKView {
       renderEncoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: verticesFacesBuffer!.length/MemoryLayout<Vertex>.size)
     }
     
-    if edgesFacesBuffer != nil {
-      renderEncoder.setVertexBuffer(edgesFacesBuffer, offset: 0, at: 0)
+    if edgesEdgesBuffer != nil {
+      renderEncoder.setVertexBuffer(edgesEdgesBuffer, offset: 0, at: 0)
       renderEncoder.setVertexBytes(&renderingConstants, length: MemoryLayout<RenderingConstants>.size, at: 1)
-      renderEncoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: edgesFacesBuffer!.length/MemoryLayout<Vertex>.size)
+      renderEncoder.drawPrimitives(type: .line, vertexStart: 0, vertexCount: edgesEdgesBuffer!.length/MemoryLayout<Vertex>.size)
     }
     
     renderEncoder.setVertexBuffer(faces3DBuffer, offset: 0, at: 0)
