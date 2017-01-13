@@ -676,6 +676,7 @@ void CppLink::makeHouse() {
   house.back().vertices.push_back(points[14]);
   
   //26: Right top edge
+  materialOfFace.push_back(1);
   house.push_back(Polygon_d());
   house.back().vertices.push_back(points[5]);
   house.back().vertices.push_back(points[7]);
@@ -765,6 +766,13 @@ void CppLink::makeHouse() {
   house.push_back(Polygon_d());
   house.back().vertices.push_back(points[0]);
   house.back().vertices.push_back(points[19]);
+  house.back().vertices.push_back(points[20]);
+  
+  //39: Door bottom edge collapses
+  materialOfFace.push_back(2);
+  house.push_back(Polygon_d());
+  house.back().vertices.push_back(points[0]);
+  house.back().vertices.push_back(points[17]);
   house.back().vertices.push_back(points[20]);
   
   //39: Window
