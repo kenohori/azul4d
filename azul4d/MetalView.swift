@@ -481,6 +481,18 @@ class MetalView: MTKView {
     renderingConstants.modelViewProjectionMatrix = matrix_multiply(projectionMatrix, matrix_multiply(viewMatrix, modelMatrix))
   }
   
+  override func magnify(with event: NSEvent) {
+    //    Swift.print("MetalView.magnify()")
+    //    Swift.print("Pinched: \(event.magnification)")
+    let magnification: Float = 1.0+Float(event.magnification)
+    fieldOfView = 2.0*atanf(tanf(0.5*fieldOfView)/magnification)
+    //    Swift.print("Field of view: \(fieldOfView)")
+    projectionMatrix = matrix4x4_perspective(fieldOfView: fieldOfView, aspectRatio: Float(bounds.size.width / bounds.size.height), nearZ: 0.001, farZ: 100.0)
+    
+    // Put model matrix in arrays and render
+    renderingConstants.modelViewProjectionMatrix = matrix_multiply(projectionMatrix, matrix_multiply(viewMatrix, modelMatrix))
+  }
+  
   override func mouseDragged(with event: NSEvent) {
     let viewFrameInWindowCoordinates = convert(bounds, to: nil)
     
