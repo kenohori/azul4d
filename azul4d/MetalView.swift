@@ -41,7 +41,7 @@ class MetalView: MTKView {
   var centre = float3(0.0, 0.0, 5.0)
   var fieldOfView: Float = 1.047197551196598
   
-  var modifierKey: Bool = false
+  var modifierKey: Int = 0
   
   var modelMatrix = matrix_identity_float4x4
   var viewMatrix = matrix_identity_float4x4
@@ -507,7 +507,7 @@ class MetalView: MTKView {
     }
     
     // Compute the motions and apply them
-    if !modifierKey {
+    if modifierKey == 0 {
       let angleX = currentX-lastX
       let rotationXY = matrix_from_columns(vector4(cos(angleX), -sin(angleX), 0.0, 0.0),
                                            vector4(sin(angleX), cos(angleX), 0.0, 0.0),
@@ -520,7 +520,7 @@ class MetalView: MTKView {
                                            vector4(0.0, 0.0, sin(angleY), cos(angleY)))
       projectionParameters.transformationMatrix = matrix_multiply(rotationXY, projectionParameters.transformationMatrix)
       projectionParameters.transformationMatrix = matrix_multiply(rotationZW, projectionParameters.transformationMatrix)
-    } else {
+    } else if modifierKey == 1 {
       let angleX = currentX-lastX
       let rotationYZ = matrix_from_columns(vector4(1.0, 0.0, 0.0, 0.0),
                                            vector4(0.0, cos(angleX), -sin(angleX), 0.0),
@@ -533,6 +533,19 @@ class MetalView: MTKView {
                                            vector4(-sin(angleY), 0.0, 0.0, cos(angleY)))
       projectionParameters.transformationMatrix = matrix_multiply(rotationYZ, projectionParameters.transformationMatrix)
       projectionParameters.transformationMatrix = matrix_multiply(rotationWX, projectionParameters.transformationMatrix)
+    } else {
+      let angleX = currentX-lastX
+      let rotationXZ = matrix_from_columns(vector4(cos(angleX), 0.0, -sin(angleX), 0.0),
+                                           vector4(0.0, 1.0, 0.0, 0.0),
+                                           vector4(sin(angleX), 0.0, cos(angleX), 0.0),
+                                           vector4(0.0, 0.0, 0.0, 1.0))
+      let angleY = currentY-lastY
+      let rotationYW = matrix_from_columns(vector4(1.0, 0.0, 0.0, 0.0),
+                                           vector4(0.0, cos(angleY), 0.0, sin(angleY)),
+                                           vector4(0.0, 0.0, 1.0, 0.0),
+                                           vector4(0.0, -sin(angleY), 0.0, cos(angleY)))
+      projectionParameters.transformationMatrix = matrix_multiply(rotationXZ, projectionParameters.transformationMatrix)
+      projectionParameters.transformationMatrix = matrix_multiply(rotationYW, projectionParameters.transformationMatrix)
     }
 
     // Project faces
@@ -578,11 +591,11 @@ class MetalView: MTKView {
   override func flagsChanged(with event: NSEvent) {
     Swift.print("Flags changed: \(event.modifierFlags.contains(.command) || event.modifierFlags.contains(.shift))")
     if event.modifierFlags.contains(.command) {
-      modifierKey = true
+      modifierKey = 1
     } else if event.modifierFlags.contains(.shift) {
-      modifierKey = true
+      modifierKey = 2
     } else {
-      modifierKey = false
+      modifierKey = 0
     }
   }
 }
