@@ -140,9 +140,9 @@ float4 crossProduct4(float4 u, float4 v, float4 w) {
 }
 
 kernel void orthographicProjection(const device VertexIn *verticesIn [[buffer(0)]],
-                                        device VertexIn *verticesOut [[buffer(1)]],
-                                        constant ProjectionParameters &projectionParameters [[buffer(2)]],
-                                        uint id [[thread_position_in_grid]]) {
+                                   device VertexIn *verticesOut [[buffer(1)]],
+                                   constant ProjectionParameters &projectionParameters [[buffer(2)]],
+                                   uint id [[thread_position_in_grid]]) {
   
   // Apply 4D transformation
   float4 transformedVertex = projectionParameters.transformationMatrix * verticesIn[id].position;
@@ -162,6 +162,20 @@ kernel void orthographicProjection(const device VertexIn *verticesIn [[buffer(0)
   
   // Output
   verticesOut[id].position = float4(eye.x, eye.y, eye.z, 1.0);
+  verticesOut[id].colour = verticesIn[id].colour;
+}
+
+kernel void longAxisProjection(const device VertexIn *verticesIn [[buffer(0)]],
+                                   device VertexIn *verticesOut [[buffer(1)]],
+                                   constant ProjectionParameters &projectionParameters [[buffer(2)]],
+                                   uint id [[thread_position_in_grid]]) {
+  
+  // Apply 4D transformation
+  float4 transformedVertex = projectionParameters.transformationMatrix * verticesIn[id].position;
+  float3 longAxis = float3(2.0*transformedVertex.w, 0.0*transformedVertex.w, 0.0*transformedVertex.w);
+  
+  // Output
+  verticesOut[id].position = float4(transformedVertex.x+longAxis.x, transformedVertex.z+longAxis.z, transformedVertex.y+longAxis.y, 1.0);
   verticesOut[id].colour = verticesIn[id].colour;
 }
 

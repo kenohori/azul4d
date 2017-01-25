@@ -82,7 +82,8 @@ class MetalView: MTKView {
     
     // Compute pipeline
 //    let projectionFunction = library.makeFunction(name: "stereographicProjection")
-    let projectionFunction = library.makeFunction(name: "orthographicProjection")
+//    let projectionFunction = library.makeFunction(name: "orthographicProjection")
+    let projectionFunction = library.makeFunction(name: "longAxisProjection")
     do {
       computePipelineState = try device!.makeComputePipelineState(function: projectionFunction!)
     } catch {

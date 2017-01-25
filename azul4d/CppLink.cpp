@@ -407,7 +407,7 @@ void CppLink::makeHouse() {
     {-1, 1, 1, 1}, // 14
     {1, 1, 1, 1}, // 15 -- end of base of second house
     
-    {0, 0, 2, 3}, // 16 -- top of the roof
+    {0, 0, 2, 1}, // 16 -- top of the roof
     
     {-0.5, -1, -1, 1}, // 17
     {-0.5, -1, 0.5, 1}, // 18
