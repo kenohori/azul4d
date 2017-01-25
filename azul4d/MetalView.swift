@@ -81,9 +81,10 @@ class MetalView: MTKView {
     let library = device!.newDefaultLibrary()!
     
     // Compute pipeline
-    let stereographicProjectionFunction = library.makeFunction(name: "stereographicProjection")
+//    let projectionFunction = library.makeFunction(name: "stereographicProjection")
+    let projectionFunction = library.makeFunction(name: "orthographicProjection")
     do {
-      computePipelineState = try device!.makeComputePipelineState(function: stereographicProjectionFunction!)
+      computePipelineState = try device!.makeComputePipelineState(function: projectionFunction!)
     } catch {
       Swift.print("Unable to create compute pipeline state")
     }
@@ -576,7 +577,9 @@ class MetalView: MTKView {
   
   override func flagsChanged(with event: NSEvent) {
     Swift.print("Flags changed: \(event.modifierFlags.contains(.command) || event.modifierFlags.contains(.shift))")
-    if event.modifierFlags.contains(.command) || event.modifierFlags.contains(.shift) {
+    if event.modifierFlags.contains(.command) {
+      modifierKey = true
+    } else if event.modifierFlags.contains(.shift) {
       modifierKey = true
     } else {
       modifierKey = false
