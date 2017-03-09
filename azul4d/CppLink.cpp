@@ -373,8 +373,8 @@ void CppLink::makeTesseract() {
   
   std::vector<Mesh_d> tesseract_refined;
   for (auto &polygon : tesseract) {
-//    tesseract_refined.push_back(refine(polygon, 0.125, 0.1));
-    tesseract_refined.push_back(triangulateQuad(polygon));
+    tesseract_refined.push_back(refine(polygon, 0.125, 0.1));
+//    tesseract_refined.push_back(triangulateQuad(polygon));
     tesseract_refined.back().colour[0] = 0.0;
     tesseract_refined.back().colour[1] = 0.0;
     tesseract_refined.back().colour[2] = 1.0;
@@ -407,7 +407,7 @@ void CppLink::makeHouse() {
     {-1, 1, 1, 1}, // 14
     {1, 1, 1, 1}, // 15 -- end of base of second house
     
-    {0, 0, 2, 3}, // 16 -- top of the roof
+    {0, 0, 2, 1}, // 16 -- top of the roof
     
     {-0.5, -1, -1, 1}, // 17
     {-0.5, -1, 0.5, 1}, // 18
@@ -676,6 +676,7 @@ void CppLink::makeHouse() {
   house.back().vertices.push_back(points[14]);
   
   //26: Right top edge
+  materialOfFace.push_back(1);
   house.push_back(Polygon_d());
   house.back().vertices.push_back(points[5]);
   house.back().vertices.push_back(points[7]);
@@ -765,6 +766,13 @@ void CppLink::makeHouse() {
   house.push_back(Polygon_d());
   house.back().vertices.push_back(points[0]);
   house.back().vertices.push_back(points[19]);
+  house.back().vertices.push_back(points[20]);
+  
+  //39: Door bottom edge collapses
+  materialOfFace.push_back(2);
+  house.push_back(Polygon_d());
+  house.back().vertices.push_back(points[0]);
+  house.back().vertices.push_back(points[17]);
   house.back().vertices.push_back(points[20]);
   
   //39: Window
