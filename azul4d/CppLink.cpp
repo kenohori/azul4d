@@ -373,8 +373,8 @@ void CppLink::makeTesseract() {
   
   std::vector<Mesh_d> tesseract_refined;
   for (auto &polygon : tesseract) {
-//    tesseract_refined.push_back(refine(polygon, 0.125, 0.1));
-    tesseract_refined.push_back(triangulateQuad(polygon));
+    tesseract_refined.push_back(refine(polygon, 0.125, 0.1));
+//    tesseract_refined.push_back(triangulateQuad(polygon));
     tesseract_refined.back().colour[0] = 0.0;
     tesseract_refined.back().colour[1] = 0.0;
     tesseract_refined.back().colour[2] = 1.0;

@@ -81,9 +81,9 @@ class MetalView: MTKView {
     let library = device!.newDefaultLibrary()!
     
     // Compute pipeline
-//    let projectionFunction = library.makeFunction(name: "stereographicProjection")
+    let projectionFunction = library.makeFunction(name: "stereographicProjection")
 //    let projectionFunction = library.makeFunction(name: "orthographicProjection")
-    let projectionFunction = library.makeFunction(name: "longAxisProjection")
+//    let projectionFunction = library.makeFunction(name: "longAxisProjection")
     do {
       computePipelineState = try device!.makeComputePipelineState(function: projectionFunction!)
     } catch {
@@ -127,8 +127,8 @@ class MetalView: MTKView {
     
     // Create data
     let cppLink = CppLinkWrapperWrapper()!
-//    cppLink.makeTesseract()
-    cppLink.makeHouse()
+    cppLink.makeTesseract()
+//    cppLink.makeHouse()
     
     // Get faces
     cppLink.initialiseFacesIterator()
@@ -201,7 +201,7 @@ class MetalView: MTKView {
     facesComputeCommandEncoder.setBuffer(faces4DBuffer, offset: 0, at: 0)
     facesComputeCommandEncoder.setBuffer(faces3DBuffer, offset: 0, at: 1)
     facesComputeCommandEncoder.setBytes(&projectionParameters, length: MemoryLayout<ProjectionParameters>.size, at: 2)
-    let facesThreadsPerGroup = MTLSize(width: 256, height: 1, depth: 1)
+    let facesThreadsPerGroup = MTLSize(width: 16, height: 1, depth: 1)
     let facesNumThreadGroups = MTLSize(width: faces.count/facesThreadsPerGroup.width, height: 1, depth: 1)
     facesComputeCommandEncoder.dispatchThreadgroups(facesNumThreadGroups, threadsPerThreadgroup: facesThreadsPerGroup)
     facesComputeCommandEncoder.endEncoding()
@@ -556,7 +556,7 @@ class MetalView: MTKView {
     facesComputeCommandEncoder.setBuffer(faces4DBuffer, offset: 0, at: 0)
     facesComputeCommandEncoder.setBuffer(faces3DBuffer, offset: 0, at: 1)
     facesComputeCommandEncoder.setBytes(&projectionParameters, length: MemoryLayout<ProjectionParameters>.size, at: 2)
-    let facesThreadsPerGroup = MTLSize(width: 256, height: 1, depth: 1)
+    let facesThreadsPerGroup = MTLSize(width: 16, height: 1, depth: 1)
     let facesNumThreadGroups = MTLSize(width: faces.count/facesThreadsPerGroup.width, height: 1, depth: 1)
     facesComputeCommandEncoder.dispatchThreadgroups(facesNumThreadGroups, threadsPerThreadgroup: facesThreadsPerGroup)
     facesComputeCommandEncoder.endEncoding()

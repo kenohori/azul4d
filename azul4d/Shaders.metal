@@ -155,7 +155,7 @@ kernel void orthographicProjection(const device VertexIn *verticesIn [[buffer(0)
   float4 d = normalise4(float4(to.x-from.x, to.y-from.y, to.z-from.z, to.w-from.w));  // Along y
   float4 a = normalise4(crossProduct4(up, over, d));  // Along x
   float4 b = normalise4(crossProduct4(over, d, a));   // Along z
-  float4 c = crossProduct4(d, a, b)*2.0;  // Along w?
+  float4 c = crossProduct4(d, a, b)*2.0;  // Along w
   
   float4x4 m(a, b, c, d);
   float4 eye = (transformedVertex-from) * m;
