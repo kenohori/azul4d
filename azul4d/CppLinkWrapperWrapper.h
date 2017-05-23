@@ -28,6 +28,7 @@ struct CppLinkWrapper;
 - (id) init;
 - (void) makeTesseract;
 - (void) makeHouse;
+- (void) makeCorridor;
 
 - (void) initialiseFacesIterator;
 - (void) advanceFacesIterator;

@@ -75,6 +75,7 @@ public:
   
   void makeTesseract();
   void makeHouse();
+  void makeCorridor();
 };
 
 #endif /* CppLink_hpp */

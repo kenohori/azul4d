@@ -11,16 +11,16 @@
 		BE13FBE21DDD17C70041FCFF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BE13FBE11DDD17C70041FCFF /* Assets.xcassets */; };
 		BE13FBE51DDD17C70041FCFF /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = BE13FBE31DDD17C70041FCFF /* MainMenu.xib */; };
 		BE2200611DF210E700B2DBFC /* Math.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE2200601DF210E700B2DBFC /* Math.swift */; };
+		BE59EC5B1EB9DC30003CCBC3 /* libboost_system-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BE59EC571EB9DC30003CCBC3 /* libboost_system-mt.dylib */; };
+		BE59EC5C1EB9DC30003CCBC3 /* libboost_thread-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BE59EC581EB9DC30003CCBC3 /* libboost_thread-mt.dylib */; };
+		BE59EC5D1EB9DC30003CCBC3 /* libCGAL_Core.12.0.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BE59EC591EB9DC30003CCBC3 /* libCGAL_Core.12.0.0.dylib */; };
+		BE59EC5E1EB9DC30003CCBC3 /* libCGAL.12.0.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BE59EC5A1EB9DC30003CCBC3 /* libCGAL.12.0.0.dylib */; };
 		BE73C5A11DDD19C8002AAD65 /* MetalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE73C5A01DDD19C8002AAD65 /* MetalView.swift */; };
 		BE73C5A31DDD1A90002AAD65 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = BE73C5A21DDD1A90002AAD65 /* Shaders.metal */; };
 		BE8636B91E0AC1F100B9663C /* libgmp.10.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BE8636B81E0AC1F100B9663C /* libgmp.10.dylib */; };
 		BE947ED11DF627EA00112978 /* CppLink.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BE947ECF1DF627EA00112978 /* CppLink.cpp */; };
-		BE947ED91DF6284A00112978 /* libCGAL_Core.12.0.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BE947ED51DF6284A00112978 /* libCGAL_Core.12.0.0.dylib */; };
-		BE947EDA1DF6284A00112978 /* libCGAL.12.0.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BE947ED61DF6284A00112978 /* libCGAL.12.0.0.dylib */; };
 		BE947EDE1DF6285C00112978 /* libmpfr.4.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BE947EDC1DF6285C00112978 /* libmpfr.4.dylib */; };
 		BE947EE01DF62DD200112978 /* CppLinkWrapperWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = BE947EDF1DF62DD200112978 /* CppLinkWrapperWrapper.mm */; };
-		BEB1FDA51E1B234200B5AD65 /* libboost_system-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BEB1FDA31E1B234200B5AD65 /* libboost_system-mt.dylib */; };
-		BEB1FDA61E1B234200B5AD65 /* libboost_thread-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = BEB1FDA41E1B234200B5AD65 /* libboost_thread-mt.dylib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,19 +30,19 @@
 		BE13FBE41DDD17C70041FCFF /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		BE13FBE61DDD17C70041FCFF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		BE2200601DF210E700B2DBFC /* Math.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Math.swift; sourceTree = "<group>"; };
+		BE59EC571EB9DC30003CCBC3 /* libboost_system-mt.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libboost_system-mt.dylib"; path = "../../../../usr/local/Cellar/boost/1.64.0_1/lib/libboost_system-mt.dylib"; sourceTree = "<group>"; };
+		BE59EC581EB9DC30003CCBC3 /* libboost_thread-mt.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libboost_thread-mt.dylib"; path = "../../../../usr/local/Cellar/boost/1.64.0_1/lib/libboost_thread-mt.dylib"; sourceTree = "<group>"; };
+		BE59EC591EB9DC30003CCBC3 /* libCGAL_Core.12.0.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libCGAL_Core.12.0.0.dylib; path = ../../../../usr/local/Cellar/cgal/4.9.1/lib/libCGAL_Core.12.0.0.dylib; sourceTree = "<group>"; };
+		BE59EC5A1EB9DC30003CCBC3 /* libCGAL.12.0.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libCGAL.12.0.0.dylib; path = ../../../../usr/local/Cellar/cgal/4.9.1/lib/libCGAL.12.0.0.dylib; sourceTree = "<group>"; };
 		BE73C5A01DDD19C8002AAD65 /* MetalView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MetalView.swift; sourceTree = "<group>"; };
 		BE73C5A21DDD1A90002AAD65 /* Shaders.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		BE8636B81E0AC1F100B9663C /* libgmp.10.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libgmp.10.dylib; path = ../../../../usr/local/Cellar/gmp/6.1.2/lib/libgmp.10.dylib; sourceTree = "<group>"; };
 		BE947ECE1DF627EA00112978 /* azul4d-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "azul4d-Bridging-Header.h"; sourceTree = "<group>"; };
 		BE947ECF1DF627EA00112978 /* CppLink.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CppLink.cpp; sourceTree = "<group>"; };
 		BE947ED01DF627EA00112978 /* CppLink.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = CppLink.hpp; sourceTree = "<group>"; };
-		BE947ED51DF6284A00112978 /* libCGAL_Core.12.0.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libCGAL_Core.12.0.0.dylib; path = ../../../../usr/local/Cellar/cgal/4.9/lib/libCGAL_Core.12.0.0.dylib; sourceTree = "<group>"; };
-		BE947ED61DF6284A00112978 /* libCGAL.12.0.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libCGAL.12.0.0.dylib; path = ../../../../usr/local/Cellar/cgal/4.9/lib/libCGAL.12.0.0.dylib; sourceTree = "<group>"; };
 		BE947EDC1DF6285C00112978 /* libmpfr.4.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmpfr.4.dylib; path = ../../../../usr/local/Cellar/mpfr/3.1.5/lib/libmpfr.4.dylib; sourceTree = "<group>"; };
 		BE947EDF1DF62DD200112978 /* CppLinkWrapperWrapper.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CppLinkWrapperWrapper.mm; sourceTree = "<group>"; };
 		BE947EE11DF62DE300112978 /* CppLinkWrapperWrapper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CppLinkWrapperWrapper.h; sourceTree = "<group>"; };
-		BEB1FDA31E1B234200B5AD65 /* libboost_system-mt.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libboost_system-mt.dylib"; path = "../../../../usr/local/Cellar/boost/1.63.0/lib/libboost_system-mt.dylib"; sourceTree = "<group>"; };
-		BEB1FDA41E1B234200B5AD65 /* libboost_thread-mt.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libboost_thread-mt.dylib"; path = "../../../../usr/local/Cellar/boost/1.63.0/lib/libboost_thread-mt.dylib"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -50,12 +50,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BEB1FDA51E1B234200B5AD65 /* libboost_system-mt.dylib in Frameworks */,
-				BEB1FDA61E1B234200B5AD65 /* libboost_thread-mt.dylib in Frameworks */,
+				BE59EC5B1EB9DC30003CCBC3 /* libboost_system-mt.dylib in Frameworks */,
+				BE59EC5C1EB9DC30003CCBC3 /* libboost_thread-mt.dylib in Frameworks */,
+				BE59EC5D1EB9DC30003CCBC3 /* libCGAL_Core.12.0.0.dylib in Frameworks */,
+				BE59EC5E1EB9DC30003CCBC3 /* libCGAL.12.0.0.dylib in Frameworks */,
 				BE8636B91E0AC1F100B9663C /* libgmp.10.dylib in Frameworks */,
 				BE947EDE1DF6285C00112978 /* libmpfr.4.dylib in Frameworks */,
-				BE947ED91DF6284A00112978 /* libCGAL_Core.12.0.0.dylib in Frameworks */,
-				BE947EDA1DF6284A00112978 /* libCGAL.12.0.0.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -101,12 +101,12 @@
 		BE947ED21DF6284A00112978 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				BEB1FDA31E1B234200B5AD65 /* libboost_system-mt.dylib */,
-				BEB1FDA41E1B234200B5AD65 /* libboost_thread-mt.dylib */,
+				BE59EC571EB9DC30003CCBC3 /* libboost_system-mt.dylib */,
+				BE59EC581EB9DC30003CCBC3 /* libboost_thread-mt.dylib */,
+				BE59EC591EB9DC30003CCBC3 /* libCGAL_Core.12.0.0.dylib */,
+				BE59EC5A1EB9DC30003CCBC3 /* libCGAL.12.0.0.dylib */,
 				BE8636B81E0AC1F100B9663C /* libgmp.10.dylib */,
 				BE947EDC1DF6285C00112978 /* libmpfr.4.dylib */,
-				BE947ED51DF6284A00112978 /* libCGAL_Core.12.0.0.dylib */,
-				BE947ED61DF6284A00112978 /* libCGAL.12.0.0.dylib */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -313,11 +313,10 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					/usr/local/Cellar/boost/1.62.0/lib,
-					/usr/local/Cellar/cgal/4.9/lib,
+					/usr/local/Cellar/boost/1.64.0_1/lib,
+					/usr/local/Cellar/cgal/4.9.1/lib,
 					/usr/local/Cellar/mpfr/3.1.5/lib,
 					/usr/local/Cellar/gmp/6.1.2/lib,
-					/usr/local/Cellar/boost/1.63.0/lib,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = tudelft3d.azul4d;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -341,11 +340,10 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					/usr/local/Cellar/boost/1.62.0/lib,
-					/usr/local/Cellar/cgal/4.9/lib,
+					/usr/local/Cellar/boost/1.64.0_1/lib,
+					/usr/local/Cellar/cgal/4.9.1/lib,
 					/usr/local/Cellar/mpfr/3.1.5/lib,
 					/usr/local/Cellar/gmp/6.1.2/lib,
-					/usr/local/Cellar/boost/1.63.0/lib,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = tudelft3d.azul4d;
 				PRODUCT_NAME = "$(TARGET_NAME)";

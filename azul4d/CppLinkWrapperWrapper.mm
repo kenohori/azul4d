@@ -38,6 +38,10 @@ struct CppLinkWrapper {
   cppLinkWrapper->cppLink->makeHouse();
 }
 
+- (void) makeCorridor {
+  cppLinkWrapper->cppLink->makeCorridor();
+}
+
 - (void) initialiseFacesIterator {
   cppLinkWrapper->cppLink->currentFace = cppLinkWrapper->cppLink->faces.begin();
 }

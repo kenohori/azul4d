@@ -127,8 +127,9 @@ class MetalView: MTKView {
     
     // Create data
     let cppLink = CppLinkWrapperWrapper()!
-    cppLink.makeTesseract()
+//    cppLink.makeTesseract()
 //    cppLink.makeHouse()
+    cppLink.makeCorridor()
     
     // Get faces
     cppLink.initialiseFacesIterator()

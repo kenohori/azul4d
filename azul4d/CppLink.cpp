@@ -823,3 +823,663 @@ void CppLink::makeHouse() {
   edges = generateEdges(house);
   vertices = generateVertices(house);
 }
+
+void CppLink::makeCorridor() {
+  
+  std::vector<Polygon_d> corridor;
+  
+  double point_coordinates[][4] = {
+    {-1, -1, -1, -1}, // 0
+    {-1, -1, -1, +1}, // 1
+    { 0, -1, -1, -1}, // 2
+    { 0, -1, -1, +1}, // 3
+    { 0,  0, -1, -1}, // 4
+    { 0,  0, -1, +1}, // 5
+    {-1,  0, -1, -1}, // 6
+    {-1,  0, -1, +1}, // 7 -- bottom of left building
+    
+    {-1, -1, +1, -1}, // 8
+    {-1, -1, +1, +1}, // 9
+    { 0, -1, +1, -1}, // 10
+    { 0, -1, +1, +1}, // 11
+    { 0,  0, +1, -1}, // 12
+    { 0,  0, +1, +1}, // 13
+    {-1,  0, +1, -1}, // 14
+    {-1,  0, +1, +1}, // 15 -- top of left building
+    
+    {0.25, -1, -1, -1}, // 16
+    {0.25, -1, -1, +1}, // 17
+    {0.75, -1, -1, -1}, // 18
+    {0.75, -1, -1, +1}, // 19
+    {0.75, +1, -1, -1}, // 20
+    {0.75, +1, -1, +1}, // 21
+    {0.25, +1, -1, -1}, // 22
+    {0.25, +1, -1, +1}, // 23 -- bottom of right building
+    
+    {0.25, -1, +1, -1}, // 24
+    {0.25, -1, +1, +1}, // 25
+    {0.75, -1, +1, -1}, // 26
+    {0.75, -1, +1, +1}, // 27
+    {0.75, +1, +1, -1}, // 28
+    {0.75, +1, +1, +1}, // 29
+    {0.25, +1, +1, -1}, // 30
+    {0.25, +1, +1, +1}, // 31 -- bottom of right building
+    
+    {0.00, -0.6, -0.67, -0.67}, // 32
+    {0.00, -0.6, -0.67, +0.67}, // 33
+    {0.25, -0.6, -0.67, -0.67}, // 34
+    {0.25, -0.6, -0.67, +0.67}, // 35
+    {0.25, -0.4, -0.67, -0.67}, // 36
+    {0.25, -0.4, -0.67, +0.67}, // 37
+    {0.00, -0.4, -0.67, -0.67}, // 38
+    {0.00, -0.4, -0.67, +0.67}, // 39 -- bottom of corridor
+    
+    {0.00, -0.6, +0.67, -0.67}, // 40
+    {0.00, -0.6, +0.67, +0.67}, // 41
+    {0.25, -0.6, +0.67, -0.67}, // 42
+    {0.25, -0.6, +0.67, +0.67}, // 43
+    {0.25, -0.4, +0.67, -0.67}, // 44
+    {0.25, -0.4, +0.67, +0.67}, // 45
+    {0.00, -0.4, +0.67, -0.67}, // 46
+    {0.00, -0.4, +0.67, +0.67}, // 47 -- top of corridor
+  };
+  
+  std::map<int, std::tuple<double, double, double>> materials;
+  std::vector<int> materialOfFace;
+  materials[0] = std::tuple<double, double, double>(0.0, 1.0, 0.0); // 0 -- left building
+  materials[1] = std::tuple<double, double, double>(0.0, 0.0, 1.0); // 1 -- right building
+  materials[2] = std::tuple<double, double, double>(1.0, 0.0, 0.0); // 2 -- corridor
+  
+  std::vector<CGAL::Point_d<Kernel>> points;
+  for (int i = 0; i < 48; ++i) {
+    points.push_back(CGAL::Point_d<Kernel>(4, point_coordinates[i], point_coordinates[i]+4));
+  }
+  
+  // 0: Base of left building at t_0
+  materialOfFace.push_back(0);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[0]);
+  corridor.back().vertices.push_back(points[2]);
+  corridor.back().vertices.push_back(points[4]);
+  corridor.back().vertices.push_back(points[6]);
+  
+  // 1: Top of left building at t_0
+  materialOfFace.push_back(0);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[8]);
+  corridor.back().vertices.push_back(points[10]);
+  corridor.back().vertices.push_back(points[12]);
+  corridor.back().vertices.push_back(points[14]);
+  
+  // 2: Left of left building at t_0
+  materialOfFace.push_back(0);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[0]);
+  corridor.back().vertices.push_back(points[6]);
+  corridor.back().vertices.push_back(points[14]);
+  corridor.back().vertices.push_back(points[8]);
+  
+  // 3: Right of left building at t_0
+  materialOfFace.push_back(0);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[2]);
+  corridor.back().vertices.push_back(points[4]);
+  corridor.back().vertices.push_back(points[12]);
+  corridor.back().vertices.push_back(points[10]);
+  
+  // 4: Front of left building at t_0
+  materialOfFace.push_back(0);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[0]);
+  corridor.back().vertices.push_back(points[2]);
+  corridor.back().vertices.push_back(points[10]);
+  corridor.back().vertices.push_back(points[8]);
+  
+  // 5: Back of left building at t_0
+  materialOfFace.push_back(0);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[6]);
+  corridor.back().vertices.push_back(points[4]);
+  corridor.back().vertices.push_back(points[12]);
+  corridor.back().vertices.push_back(points[14]);
+  
+  // 6: Base of left building at t_3
+  materialOfFace.push_back(0);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[1]);
+  corridor.back().vertices.push_back(points[3]);
+  corridor.back().vertices.push_back(points[5]);
+  corridor.back().vertices.push_back(points[7]);
+  
+  // 7: Top of left building at t_3
+  materialOfFace.push_back(0);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[9]);
+  corridor.back().vertices.push_back(points[11]);
+  corridor.back().vertices.push_back(points[13]);
+  corridor.back().vertices.push_back(points[15]);
+  
+  // 8: Left of left building at t_3
+  materialOfFace.push_back(0);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[1]);
+  corridor.back().vertices.push_back(points[7]);
+  corridor.back().vertices.push_back(points[15]);
+  corridor.back().vertices.push_back(points[9]);
+  
+  // 9: Right of left building at t_3
+  materialOfFace.push_back(0);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[3]);
+  corridor.back().vertices.push_back(points[5]);
+  corridor.back().vertices.push_back(points[13]);
+  corridor.back().vertices.push_back(points[11]);
+  
+  // 10: Front of left building at t_3
+  materialOfFace.push_back(0);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[1]);
+  corridor.back().vertices.push_back(points[3]);
+  corridor.back().vertices.push_back(points[11]);
+  corridor.back().vertices.push_back(points[9]);
+  
+  // 11: Back of left building at t_3
+  materialOfFace.push_back(0);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[7]);
+  corridor.back().vertices.push_back(points[5]);
+  corridor.back().vertices.push_back(points[13]);
+  corridor.back().vertices.push_back(points[15]);
+  
+  // 12: Bottom left edge of left building
+  materialOfFace.push_back(0);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[0]);
+  corridor.back().vertices.push_back(points[6]);
+  corridor.back().vertices.push_back(points[7]);
+  corridor.back().vertices.push_back(points[1]);
+  
+  // 13: Bottom front edge of left building
+  materialOfFace.push_back(0);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[0]);
+  corridor.back().vertices.push_back(points[2]);
+  corridor.back().vertices.push_back(points[3]);
+  corridor.back().vertices.push_back(points[1]);
+  
+  // 14: Bottom right edge of left building
+  materialOfFace.push_back(0);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[2]);
+  corridor.back().vertices.push_back(points[4]);
+  corridor.back().vertices.push_back(points[5]);
+  corridor.back().vertices.push_back(points[3]);
+  
+  // 15: Bottom back edge of left building
+  materialOfFace.push_back(0);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[4]);
+  corridor.back().vertices.push_back(points[6]);
+  corridor.back().vertices.push_back(points[7]);
+  corridor.back().vertices.push_back(points[5]);
+  
+  // 16: Front left edge of left building
+  materialOfFace.push_back(0);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[0]);
+  corridor.back().vertices.push_back(points[8]);
+  corridor.back().vertices.push_back(points[9]);
+  corridor.back().vertices.push_back(points[1]);
+  
+  // 17: Front right edge of left building
+  materialOfFace.push_back(0);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[2]);
+  corridor.back().vertices.push_back(points[10]);
+  corridor.back().vertices.push_back(points[11]);
+  corridor.back().vertices.push_back(points[3]);
+  
+  // 18: Back right edge of left building
+  materialOfFace.push_back(0);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[4]);
+  corridor.back().vertices.push_back(points[12]);
+  corridor.back().vertices.push_back(points[13]);
+  corridor.back().vertices.push_back(points[5]);
+  
+  // 19: Back left edge of left building
+  materialOfFace.push_back(0);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[6]);
+  corridor.back().vertices.push_back(points[14]);
+  corridor.back().vertices.push_back(points[15]);
+  corridor.back().vertices.push_back(points[7]);
+  
+  // 20: Top left edge of left building
+  materialOfFace.push_back(0);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[8]);
+  corridor.back().vertices.push_back(points[14]);
+  corridor.back().vertices.push_back(points[15]);
+  corridor.back().vertices.push_back(points[9]);
+  
+  // 21: Top front edge of left building
+  materialOfFace.push_back(0);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[8]);
+  corridor.back().vertices.push_back(points[10]);
+  corridor.back().vertices.push_back(points[11]);
+  corridor.back().vertices.push_back(points[9]);
+  
+  // 22: Top right edge of left building
+  materialOfFace.push_back(0);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[10]);
+  corridor.back().vertices.push_back(points[12]);
+  corridor.back().vertices.push_back(points[13]);
+  corridor.back().vertices.push_back(points[11]);
+  
+  // 23: Top back edge of left building
+  materialOfFace.push_back(0);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[12]);
+  corridor.back().vertices.push_back(points[14]);
+  corridor.back().vertices.push_back(points[15]);
+  corridor.back().vertices.push_back(points[13]);
+  
+  // 24: Base of right building at t_0
+  materialOfFace.push_back(1);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[16]);
+  corridor.back().vertices.push_back(points[18]);
+  corridor.back().vertices.push_back(points[20]);
+  corridor.back().vertices.push_back(points[22]);
+  
+  // 25: Top of right building at t_0
+  materialOfFace.push_back(1);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[24]);
+  corridor.back().vertices.push_back(points[26]);
+  corridor.back().vertices.push_back(points[28]);
+  corridor.back().vertices.push_back(points[30]);
+  
+  // 26: Left of right building at t_0
+  materialOfFace.push_back(1);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[16]);
+  corridor.back().vertices.push_back(points[22]);
+  corridor.back().vertices.push_back(points[30]);
+  corridor.back().vertices.push_back(points[24]);
+  
+  // 27: Right of right building at t_0
+  materialOfFace.push_back(1);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[18]);
+  corridor.back().vertices.push_back(points[20]);
+  corridor.back().vertices.push_back(points[28]);
+  corridor.back().vertices.push_back(points[26]);
+  
+  // 28: Front of right building at t_0
+  materialOfFace.push_back(1);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[16]);
+  corridor.back().vertices.push_back(points[18]);
+  corridor.back().vertices.push_back(points[26]);
+  corridor.back().vertices.push_back(points[24]);
+  
+  // 29: Back of right building at t_0
+  materialOfFace.push_back(1);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[22]);
+  corridor.back().vertices.push_back(points[20]);
+  corridor.back().vertices.push_back(points[28]);
+  corridor.back().vertices.push_back(points[30]);
+  
+  // 30: Base of right building at t_3
+  materialOfFace.push_back(1);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[17]);
+  corridor.back().vertices.push_back(points[19]);
+  corridor.back().vertices.push_back(points[21]);
+  corridor.back().vertices.push_back(points[23]);
+  
+  // 31: Top of right building at t_3
+  materialOfFace.push_back(1);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[25]);
+  corridor.back().vertices.push_back(points[27]);
+  corridor.back().vertices.push_back(points[29]);
+  corridor.back().vertices.push_back(points[31]);
+  
+  // 32: Left of right building at t_3
+  materialOfFace.push_back(1);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[17]);
+  corridor.back().vertices.push_back(points[23]);
+  corridor.back().vertices.push_back(points[31]);
+  corridor.back().vertices.push_back(points[25]);
+  
+  // 33: Right of right building at t_3
+  materialOfFace.push_back(1);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[19]);
+  corridor.back().vertices.push_back(points[21]);
+  corridor.back().vertices.push_back(points[29]);
+  corridor.back().vertices.push_back(points[27]);
+  
+  // 34: Front of right building at t_3
+  materialOfFace.push_back(1);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[17]);
+  corridor.back().vertices.push_back(points[19]);
+  corridor.back().vertices.push_back(points[27]);
+  corridor.back().vertices.push_back(points[25]);
+  
+  // 35: Back of right building at t_3
+  materialOfFace.push_back(1);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[23]);
+  corridor.back().vertices.push_back(points[21]);
+  corridor.back().vertices.push_back(points[29]);
+  corridor.back().vertices.push_back(points[31]);
+  
+  // 36: Bottom left edge of right building
+  materialOfFace.push_back(1);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[16]);
+  corridor.back().vertices.push_back(points[22]);
+  corridor.back().vertices.push_back(points[23]);
+  corridor.back().vertices.push_back(points[17]);
+  
+  // 37: Bottom front edge of right building
+  materialOfFace.push_back(1);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[16]);
+  corridor.back().vertices.push_back(points[18]);
+  corridor.back().vertices.push_back(points[19]);
+  corridor.back().vertices.push_back(points[17]);
+  
+  // 38: Bottom right edge of right building
+  materialOfFace.push_back(1);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[18]);
+  corridor.back().vertices.push_back(points[20]);
+  corridor.back().vertices.push_back(points[21]);
+  corridor.back().vertices.push_back(points[19]);
+  
+  // 39: Bottom back edge of right building
+  materialOfFace.push_back(1);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[20]);
+  corridor.back().vertices.push_back(points[22]);
+  corridor.back().vertices.push_back(points[23]);
+  corridor.back().vertices.push_back(points[21]);
+  
+  // 40: Front left edge of right building
+  materialOfFace.push_back(1);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[16]);
+  corridor.back().vertices.push_back(points[24]);
+  corridor.back().vertices.push_back(points[25]);
+  corridor.back().vertices.push_back(points[17]);
+  
+  // 41: Front right edge of right building
+  materialOfFace.push_back(1);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[18]);
+  corridor.back().vertices.push_back(points[26]);
+  corridor.back().vertices.push_back(points[27]);
+  corridor.back().vertices.push_back(points[19]);
+  
+  // 42: Back right edge of right building
+  materialOfFace.push_back(1);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[20]);
+  corridor.back().vertices.push_back(points[28]);
+  corridor.back().vertices.push_back(points[29]);
+  corridor.back().vertices.push_back(points[21]);
+  
+  // 43: Back left edge of right building
+  materialOfFace.push_back(1);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[22]);
+  corridor.back().vertices.push_back(points[30]);
+  corridor.back().vertices.push_back(points[31]);
+  corridor.back().vertices.push_back(points[23]);
+  
+  // 44: Top left edge of right building
+  materialOfFace.push_back(1);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[24]);
+  corridor.back().vertices.push_back(points[30]);
+  corridor.back().vertices.push_back(points[31]);
+  corridor.back().vertices.push_back(points[25]);
+  
+  // 45: Top front edge of right building
+  materialOfFace.push_back(1);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[24]);
+  corridor.back().vertices.push_back(points[26]);
+  corridor.back().vertices.push_back(points[27]);
+  corridor.back().vertices.push_back(points[25]);
+  
+  // 46: Top right edge of right building
+  materialOfFace.push_back(1);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[26]);
+  corridor.back().vertices.push_back(points[28]);
+  corridor.back().vertices.push_back(points[29]);
+  corridor.back().vertices.push_back(points[27]);
+  
+  // 47: Top back edge of right building
+  materialOfFace.push_back(1);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[28]);
+  corridor.back().vertices.push_back(points[30]);
+  corridor.back().vertices.push_back(points[31]);
+  corridor.back().vertices.push_back(points[29]);
+  
+  // 48: Base of corridor at t_1
+  materialOfFace.push_back(2);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[32]);
+  corridor.back().vertices.push_back(points[34]);
+  corridor.back().vertices.push_back(points[36]);
+  corridor.back().vertices.push_back(points[38]);
+  
+  // 49: Top of corridor at t_1
+  materialOfFace.push_back(2);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[40]);
+  corridor.back().vertices.push_back(points[42]);
+  corridor.back().vertices.push_back(points[44]);
+  corridor.back().vertices.push_back(points[46]);
+  
+  // 50: Left of corridor at t_1
+  materialOfFace.push_back(2);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[32]);
+  corridor.back().vertices.push_back(points[38]);
+  corridor.back().vertices.push_back(points[46]);
+  corridor.back().vertices.push_back(points[40]);
+  
+  // 51: Right of corridor at t_1
+  materialOfFace.push_back(2);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[34]);
+  corridor.back().vertices.push_back(points[36]);
+  corridor.back().vertices.push_back(points[44]);
+  corridor.back().vertices.push_back(points[42]);
+  
+  // 52: Front of corridor at t_1
+  materialOfFace.push_back(2);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[32]);
+  corridor.back().vertices.push_back(points[34]);
+  corridor.back().vertices.push_back(points[42]);
+  corridor.back().vertices.push_back(points[40]);
+  
+  // 53: Back of corridor at t_1
+  materialOfFace.push_back(2);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[38]);
+  corridor.back().vertices.push_back(points[36]);
+  corridor.back().vertices.push_back(points[44]);
+  corridor.back().vertices.push_back(points[46]);
+  
+  // 54: Base of corridor at t_2
+  materialOfFace.push_back(2);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[33]);
+  corridor.back().vertices.push_back(points[35]);
+  corridor.back().vertices.push_back(points[37]);
+  corridor.back().vertices.push_back(points[39]);
+  
+  // 55: Top of corridor at t_2
+  materialOfFace.push_back(2);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[41]);
+  corridor.back().vertices.push_back(points[43]);
+  corridor.back().vertices.push_back(points[45]);
+  corridor.back().vertices.push_back(points[47]);
+  
+  // 56: Left of corridor at t_2
+  materialOfFace.push_back(2);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[33]);
+  corridor.back().vertices.push_back(points[39]);
+  corridor.back().vertices.push_back(points[47]);
+  corridor.back().vertices.push_back(points[41]);
+  
+  // 57: Right of corridor at t_2
+  materialOfFace.push_back(2);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[35]);
+  corridor.back().vertices.push_back(points[37]);
+  corridor.back().vertices.push_back(points[45]);
+  corridor.back().vertices.push_back(points[43]);
+  
+  // 58: Front of corridor at t_2
+  materialOfFace.push_back(2);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[33]);
+  corridor.back().vertices.push_back(points[35]);
+  corridor.back().vertices.push_back(points[43]);
+  corridor.back().vertices.push_back(points[41]);
+  
+  // 59: Back of corridor at t_2
+  materialOfFace.push_back(2);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[39]);
+  corridor.back().vertices.push_back(points[37]);
+  corridor.back().vertices.push_back(points[45]);
+  corridor.back().vertices.push_back(points[47]);
+  
+  // 60: Bottom left edge of corridor
+  materialOfFace.push_back(2);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[32]);
+  corridor.back().vertices.push_back(points[38]);
+  corridor.back().vertices.push_back(points[39]);
+  corridor.back().vertices.push_back(points[33]);
+  
+  // 61: Bottom front edge of corridor
+  materialOfFace.push_back(2);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[32]);
+  corridor.back().vertices.push_back(points[34]);
+  corridor.back().vertices.push_back(points[35]);
+  corridor.back().vertices.push_back(points[33]);
+  
+  // 62: Bottom right edge of corridor
+  materialOfFace.push_back(2);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[34]);
+  corridor.back().vertices.push_back(points[36]);
+  corridor.back().vertices.push_back(points[37]);
+  corridor.back().vertices.push_back(points[35]);
+  
+  // 63: Bottom back edge of corridor
+  materialOfFace.push_back(2);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[36]);
+  corridor.back().vertices.push_back(points[38]);
+  corridor.back().vertices.push_back(points[39]);
+  corridor.back().vertices.push_back(points[37]);
+  
+  // 64: Front left edge of corridor
+  materialOfFace.push_back(2);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[32]);
+  corridor.back().vertices.push_back(points[40]);
+  corridor.back().vertices.push_back(points[41]);
+  corridor.back().vertices.push_back(points[33]);
+  
+  // 65: Front right edge of corridor
+  materialOfFace.push_back(2);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[34]);
+  corridor.back().vertices.push_back(points[42]);
+  corridor.back().vertices.push_back(points[43]);
+  corridor.back().vertices.push_back(points[35]);
+  
+  // 66: Back right edge of corridor
+  materialOfFace.push_back(2);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[36]);
+  corridor.back().vertices.push_back(points[44]);
+  corridor.back().vertices.push_back(points[45]);
+  corridor.back().vertices.push_back(points[37]);
+  
+  // 67: Back left edge of corridor
+  materialOfFace.push_back(2);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[38]);
+  corridor.back().vertices.push_back(points[46]);
+  corridor.back().vertices.push_back(points[47]);
+  corridor.back().vertices.push_back(points[39]);
+  
+  // 68: Top left edge of corridor
+  materialOfFace.push_back(2);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[40]);
+  corridor.back().vertices.push_back(points[46]);
+  corridor.back().vertices.push_back(points[47]);
+  corridor.back().vertices.push_back(points[41]);
+  
+  // 69: Top front edge of corridor
+  materialOfFace.push_back(2);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[40]);
+  corridor.back().vertices.push_back(points[42]);
+  corridor.back().vertices.push_back(points[43]);
+  corridor.back().vertices.push_back(points[41]);
+  
+  // 70: Top right edge of corridor
+  materialOfFace.push_back(2);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[42]);
+  corridor.back().vertices.push_back(points[44]);
+  corridor.back().vertices.push_back(points[45]);
+  corridor.back().vertices.push_back(points[43]);
+  
+  // 71: Top back edge of corridor
+  materialOfFace.push_back(2);
+  corridor.push_back(Polygon_d());
+  corridor.back().vertices.push_back(points[44]);
+  corridor.back().vertices.push_back(points[46]);
+  corridor.back().vertices.push_back(points[47]);
+  corridor.back().vertices.push_back(points[45]);
+  
+  std::vector<Mesh_d> corridorRefined;
+  for (unsigned int index = 0; index < corridor.size(); ++index) {
+    corridorRefined.push_back(refine(corridor[index], 0.125, 0.1));
+    //    corridorRefined(triangulateQuad(house[index]));
+    corridorRefined.back().colour[0] = std::get<0>(materials[materialOfFace[index]]);
+    corridorRefined.back().colour[1] = std::get<1>(materials[materialOfFace[index]]);
+    corridorRefined.back().colour[2] = std::get<2>(materials[materialOfFace[index]]);
+    corridorRefined.back().colour[3] = 0.2;
+  } faces = corridorRefined;
+  edges = generateEdges(corridor);
+  vertices = generateVertices(corridor);
+}
