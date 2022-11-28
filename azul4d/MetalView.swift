@@ -78,7 +78,7 @@ class MetalView: MTKView {
     commandQueue = device!.makeCommandQueue()
     
     // Library
-    let library = device!.newDefaultLibrary()!
+    let library = device!.makeDefaultLibrary()!
     
     // Compute pipeline
     let projectionFunction = library.makeFunction(name: "stereographicProjection")
@@ -128,8 +128,8 @@ class MetalView: MTKView {
     // Create data
     let cppLink = CppLinkWrapperWrapper()!
 //    cppLink.makeTesseract()
-//    cppLink.makeHouse()
-    cppLink.makeCorridor()
+    cppLink.makeHouse()
+//    cppLink.makeCorridor()
     
     // Get faces
     cppLink.initialiseFacesIterator()
@@ -197,42 +197,42 @@ class MetalView: MTKView {
     
     // Project faces
     let facesCommandBuffer = commandQueue!.makeCommandBuffer()
-    let facesComputeCommandEncoder = facesCommandBuffer.makeComputeCommandEncoder()
-    facesComputeCommandEncoder.setComputePipelineState(computePipelineState!)
-    facesComputeCommandEncoder.setBuffer(faces4DBuffer, offset: 0, at: 0)
-    facesComputeCommandEncoder.setBuffer(faces3DBuffer, offset: 0, at: 1)
-    facesComputeCommandEncoder.setBytes(&projectionParameters, length: MemoryLayout<ProjectionParameters>.size, at: 2)
+    let facesComputeCommandEncoder = facesCommandBuffer!.makeComputeCommandEncoder()
+    facesComputeCommandEncoder!.setComputePipelineState(computePipelineState!)
+    facesComputeCommandEncoder!.setBuffer(faces4DBuffer, offset: 0, index: 0)
+    facesComputeCommandEncoder!.setBuffer(faces3DBuffer, offset: 0, index: 1)
+    facesComputeCommandEncoder!.setBytes(&projectionParameters, length: MemoryLayout<ProjectionParameters>.size, index: 2)
     let facesThreadsPerGroup = MTLSize(width: 16, height: 1, depth: 1)
     let facesNumThreadGroups = MTLSize(width: faces.count/facesThreadsPerGroup.width, height: 1, depth: 1)
-    facesComputeCommandEncoder.dispatchThreadgroups(facesNumThreadGroups, threadsPerThreadgroup: facesThreadsPerGroup)
-    facesComputeCommandEncoder.endEncoding()
-    facesCommandBuffer.commit()
+    facesComputeCommandEncoder!.dispatchThreadgroups(facesNumThreadGroups, threadsPerThreadgroup: facesThreadsPerGroup)
+    facesComputeCommandEncoder!.endEncoding()
+    facesCommandBuffer!.commit()
     
     // Project edges
     let edgesCommandBuffer = commandQueue!.makeCommandBuffer()
-    let edgesComputeCommandEncoder = edgesCommandBuffer.makeComputeCommandEncoder()
-    edgesComputeCommandEncoder.setComputePipelineState(computePipelineState!)
-    edgesComputeCommandEncoder.setBuffer(edges4DBuffer, offset: 0, at: 0)
-    edgesComputeCommandEncoder.setBuffer(edges3DBuffer, offset: 0, at: 1)
-    edgesComputeCommandEncoder.setBytes(&projectionParameters, length: MemoryLayout<ProjectionParameters>.size, at: 2)
+    let edgesComputeCommandEncoder = edgesCommandBuffer!.makeComputeCommandEncoder()
+    edgesComputeCommandEncoder!.setComputePipelineState(computePipelineState!)
+    edgesComputeCommandEncoder!.setBuffer(edges4DBuffer, offset: 0, index: 0)
+    edgesComputeCommandEncoder!.setBuffer(edges3DBuffer, offset: 0, index: 1)
+    edgesComputeCommandEncoder!.setBytes(&projectionParameters, length: MemoryLayout<ProjectionParameters>.size, index: 2)
     let edgesThreadsPerGroup = MTLSize(width: 16, height: 1, depth: 1)
     let edgesNumThreadGroups = MTLSize(width: edges.count/edgesThreadsPerGroup.width, height: 1, depth: 1)
-    edgesComputeCommandEncoder.dispatchThreadgroups(edgesNumThreadGroups, threadsPerThreadgroup: edgesThreadsPerGroup)
-    edgesComputeCommandEncoder.endEncoding()
-    edgesCommandBuffer.commit()
+    edgesComputeCommandEncoder!.dispatchThreadgroups(edgesNumThreadGroups, threadsPerThreadgroup: edgesThreadsPerGroup)
+    edgesComputeCommandEncoder!.endEncoding()
+    edgesCommandBuffer!.commit()
     
     // Project vertices
     let verticesCommandBuffer = commandQueue!.makeCommandBuffer()
-    let verticesComputeCommandEncoder = verticesCommandBuffer.makeComputeCommandEncoder()
-    verticesComputeCommandEncoder.setComputePipelineState(computePipelineState!)
-    verticesComputeCommandEncoder.setBuffer(vertices4DBuffer, offset: 0, at: 0)
-    verticesComputeCommandEncoder.setBuffer(vertices3DBuffer, offset: 0, at: 1)
-    verticesComputeCommandEncoder.setBytes(&projectionParameters, length: MemoryLayout<ProjectionParameters>.size, at: 2)
+    let verticesComputeCommandEncoder = verticesCommandBuffer!.makeComputeCommandEncoder()
+    verticesComputeCommandEncoder!.setComputePipelineState(computePipelineState!)
+    verticesComputeCommandEncoder!.setBuffer(vertices4DBuffer, offset: 0, index: 0)
+    verticesComputeCommandEncoder!.setBuffer(vertices3DBuffer, offset: 0, index: 1)
+    verticesComputeCommandEncoder!.setBytes(&projectionParameters, length: MemoryLayout<ProjectionParameters>.size, index: 2)
     let verticesThreadsPerGroup = MTLSize(width: 16, height: 1, depth: 1)
     let verticesNumThreadGroups = MTLSize(width: vertices.count/verticesThreadsPerGroup.width, height: 1, depth: 1)
-    verticesComputeCommandEncoder.dispatchThreadgroups(verticesNumThreadGroups, threadsPerThreadgroup: verticesThreadsPerGroup)
-    verticesComputeCommandEncoder.endEncoding()
-    verticesCommandBuffer.commit()
+    verticesComputeCommandEncoder!.dispatchThreadgroups(verticesNumThreadGroups, threadsPerThreadgroup: verticesThreadsPerGroup)
+    verticesComputeCommandEncoder!.endEncoding()
+    verticesCommandBuffer!.commit()
   }
   
   func generateVertices() {
@@ -428,35 +428,35 @@ class MetalView: MTKView {
     
     let commandBuffer = commandQueue!.makeCommandBuffer()
     let renderPassDescriptor = currentRenderPassDescriptor!
-    let renderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor)
+    let renderEncoder = commandBuffer!.makeRenderCommandEncoder(descriptor: renderPassDescriptor)
     
-    renderEncoder.setFrontFacing(.counterClockwise)
-    renderEncoder.setDepthStencilState(depthStencilState)
-    renderEncoder.setRenderPipelineState(renderPipelineState!)
+    renderEncoder!.setFrontFacing(.counterClockwise)
+    renderEncoder!.setDepthStencilState(depthStencilState)
+    renderEncoder!.setRenderPipelineState(renderPipelineState!)
     
 //    let colour = sin(CACurrentMediaTime())
 //    clearColor = MTLClearColorMake(colour, colour, colour, 1.0)
     
     if verticesFacesBuffer != nil {
-      renderEncoder.setVertexBuffer(verticesFacesBuffer, offset: 0, at: 0)
-      renderEncoder.setVertexBytes(&renderingConstants, length: MemoryLayout<RenderingConstants>.size, at: 1)
-      renderEncoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: verticesFacesBuffer!.length/MemoryLayout<Vertex>.size)
+      renderEncoder!.setVertexBuffer(verticesFacesBuffer, offset: 0, index: 0)
+      renderEncoder!.setVertexBytes(&renderingConstants, length: MemoryLayout<RenderingConstants>.size, index: 1)
+      renderEncoder!.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: verticesFacesBuffer!.length/MemoryLayout<Vertex>.size)
     }
     
     if edgesEdgesBuffer != nil {
-      renderEncoder.setVertexBuffer(edgesEdgesBuffer, offset: 0, at: 0)
-      renderEncoder.setVertexBytes(&renderingConstants, length: MemoryLayout<RenderingConstants>.size, at: 1)
-      renderEncoder.drawPrimitives(type: .line, vertexStart: 0, vertexCount: edgesEdgesBuffer!.length/MemoryLayout<Vertex>.size)
+      renderEncoder!.setVertexBuffer(edgesEdgesBuffer, offset: 0, index: 0)
+      renderEncoder!.setVertexBytes(&renderingConstants, length: MemoryLayout<RenderingConstants>.size, index: 1)
+      renderEncoder!.drawPrimitives(type: .line, vertexStart: 0, vertexCount: edgesEdgesBuffer!.length/MemoryLayout<Vertex>.size)
     }
     
-    renderEncoder.setVertexBuffer(faces3DBuffer, offset: 0, at: 0)
-    renderEncoder.setVertexBytes(&renderingConstants, length: MemoryLayout<RenderingConstants>.size, at: 1)
-    renderEncoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: faces3DBuffer!.length/MemoryLayout<Vertex>.size)
+    renderEncoder!.setVertexBuffer(faces3DBuffer, offset: 0, index: 0)
+    renderEncoder!.setVertexBytes(&renderingConstants, length: MemoryLayout<RenderingConstants>.size, index: 1)
+    renderEncoder!.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: faces3DBuffer!.length/MemoryLayout<Vertex>.size)
     
-    renderEncoder.endEncoding()
+    renderEncoder!.endEncoding()
     let drawable = currentDrawable!
-    commandBuffer.present(drawable)
-    commandBuffer.commit()
+    commandBuffer!.present(drawable)
+    commandBuffer!.commit()
     
     generateVertices()
     generateEdges()
@@ -552,42 +552,42 @@ class MetalView: MTKView {
 
     // Project faces
     let facesCommandBuffer = commandQueue!.makeCommandBuffer()
-    let facesComputeCommandEncoder = facesCommandBuffer.makeComputeCommandEncoder()
-    facesComputeCommandEncoder.setComputePipelineState(computePipelineState!)
-    facesComputeCommandEncoder.setBuffer(faces4DBuffer, offset: 0, at: 0)
-    facesComputeCommandEncoder.setBuffer(faces3DBuffer, offset: 0, at: 1)
-    facesComputeCommandEncoder.setBytes(&projectionParameters, length: MemoryLayout<ProjectionParameters>.size, at: 2)
+    let facesComputeCommandEncoder = facesCommandBuffer!.makeComputeCommandEncoder()
+    facesComputeCommandEncoder!.setComputePipelineState(computePipelineState!)
+    facesComputeCommandEncoder!.setBuffer(faces4DBuffer, offset: 0, index: 0)
+    facesComputeCommandEncoder!.setBuffer(faces3DBuffer, offset: 0, index: 1)
+    facesComputeCommandEncoder!.setBytes(&projectionParameters, length: MemoryLayout<ProjectionParameters>.size, index: 2)
     let facesThreadsPerGroup = MTLSize(width: 16, height: 1, depth: 1)
     let facesNumThreadGroups = MTLSize(width: faces.count/facesThreadsPerGroup.width, height: 1, depth: 1)
-    facesComputeCommandEncoder.dispatchThreadgroups(facesNumThreadGroups, threadsPerThreadgroup: facesThreadsPerGroup)
-    facesComputeCommandEncoder.endEncoding()
-    facesCommandBuffer.commit()
+    facesComputeCommandEncoder!.dispatchThreadgroups(facesNumThreadGroups, threadsPerThreadgroup: facesThreadsPerGroup)
+    facesComputeCommandEncoder!.endEncoding()
+    facesCommandBuffer!.commit()
     
     // Project edges
     let edgesCommandBuffer = commandQueue!.makeCommandBuffer()
-    let edgesComputeCommandEncoder = edgesCommandBuffer.makeComputeCommandEncoder()
-    edgesComputeCommandEncoder.setComputePipelineState(computePipelineState!)
-    edgesComputeCommandEncoder.setBuffer(edges4DBuffer, offset: 0, at: 0)
-    edgesComputeCommandEncoder.setBuffer(edges3DBuffer, offset: 0, at: 1)
-    edgesComputeCommandEncoder.setBytes(&projectionParameters, length: MemoryLayout<ProjectionParameters>.size, at: 2)
+    let edgesComputeCommandEncoder = edgesCommandBuffer!.makeComputeCommandEncoder()
+    edgesComputeCommandEncoder!.setComputePipelineState(computePipelineState!)
+    edgesComputeCommandEncoder!.setBuffer(edges4DBuffer, offset: 0, index: 0)
+    edgesComputeCommandEncoder!.setBuffer(edges3DBuffer, offset: 0, index: 1)
+    edgesComputeCommandEncoder!.setBytes(&projectionParameters, length: MemoryLayout<ProjectionParameters>.size, index: 2)
     let edgesThreadsPerGroup = MTLSize(width: 16, height: 1, depth: 1)
     let edgesNumThreadGroups = MTLSize(width: edges.count/edgesThreadsPerGroup.width, height: 1, depth: 1)
-    edgesComputeCommandEncoder.dispatchThreadgroups(edgesNumThreadGroups, threadsPerThreadgroup: edgesThreadsPerGroup)
-    edgesComputeCommandEncoder.endEncoding()
-    edgesCommandBuffer.commit()
+    edgesComputeCommandEncoder!.dispatchThreadgroups(edgesNumThreadGroups, threadsPerThreadgroup: edgesThreadsPerGroup)
+    edgesComputeCommandEncoder!.endEncoding()
+    edgesCommandBuffer!.commit()
     
     // Project vertices
     let verticesCommandBuffer = commandQueue!.makeCommandBuffer()
-    let verticesComputeCommandEncoder = verticesCommandBuffer.makeComputeCommandEncoder()
-    verticesComputeCommandEncoder.setComputePipelineState(computePipelineState!)
-    verticesComputeCommandEncoder.setBuffer(vertices4DBuffer, offset: 0, at: 0)
-    verticesComputeCommandEncoder.setBuffer(vertices3DBuffer, offset: 0, at: 1)
-    verticesComputeCommandEncoder.setBytes(&projectionParameters, length: MemoryLayout<ProjectionParameters>.size, at: 2)
+    let verticesComputeCommandEncoder = verticesCommandBuffer!.makeComputeCommandEncoder()
+    verticesComputeCommandEncoder!.setComputePipelineState(computePipelineState!)
+    verticesComputeCommandEncoder!.setBuffer(vertices4DBuffer, offset: 0, index: 0)
+    verticesComputeCommandEncoder!.setBuffer(vertices3DBuffer, offset: 0, index: 1)
+    verticesComputeCommandEncoder!.setBytes(&projectionParameters, length: MemoryLayout<ProjectionParameters>.size, index: 2)
     let verticesThreadsPerGroup = MTLSize(width: 16, height: 1, depth: 1)
     let verticesNumThreadGroups = MTLSize(width: vertices.count/verticesThreadsPerGroup.width, height: 1, depth: 1)
-    verticesComputeCommandEncoder.dispatchThreadgroups(verticesNumThreadGroups, threadsPerThreadgroup: verticesThreadsPerGroup)
-    verticesComputeCommandEncoder.endEncoding()
-    verticesCommandBuffer.commit()
+    verticesComputeCommandEncoder!.dispatchThreadgroups(verticesNumThreadGroups, threadsPerThreadgroup: verticesThreadsPerGroup)
+    verticesComputeCommandEncoder!.endEncoding()
+    verticesCommandBuffer!.commit()
   }
   
   override func flagsChanged(with event: NSEvent) {
